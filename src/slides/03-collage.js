@@ -112,6 +112,10 @@ export const slide03 = {
     )
 
     let opened = false
+    // Pointer que abrió el lightbox: al reparentar la polaroid dentro de
+    // `.lightbox` en el mismo pointerdown, el pointerup de ese gesto pasa a
+    // hacer bubbling a través de `.lightbox` y lo cerraría de inmediato.
+    let openingPointerId = null
     let pulseTween = gsap.to(slots[0].photo, {
       scale: 1.06,
       boxShadow: '0 0 18px rgba(212, 175, 55, 0.6)',
@@ -128,10 +132,11 @@ export const slide03 = {
       gsap.set(slots[0].photo, { boxShadow: 'none' })
     }
 
-    function openLightbox(index) {
+    function openLightbox(index, pointerId) {
       stopPulse()
       if (opened) return
       opened = true
+      openingPointerId = pointerId
       const { lightbox, photoSlotFull, eyebrow, caption, body } = el._collage
       const photoEl = slots[index].photo
       const data = photos[index]
@@ -177,11 +182,15 @@ export const slide03 = {
     }
 
     slots.forEach((s, i) => {
-      s.photo.addEventListener('pointerdown', () => openLightbox(i))
+      s.photo.addEventListener('pointerdown', (e) => openLightbox(i, e.pointerId))
     })
 
     // Dentro del lightbox, cualquier tap o un swipe hacia abajo cierra.
-    el._collage.lightbox.addEventListener('pointerup', () => {
+    el._collage.lightbox.addEventListener('pointerup', (e) => {
+      if (e.pointerId === openingPointerId) {
+        openingPointerId = null
+        return
+      }
       if (opened) closeLightbox()
     })
 
