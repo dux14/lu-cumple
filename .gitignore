@@ -4,3 +4,4 @@ docs/
 .superpowers/
 CLAUDE.md
 .DS_Store
+.playwright-mcp/

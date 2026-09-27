@@ -24,10 +24,11 @@
 .display {
   font-family: var(--f-display);
   font-weight: 600;
-  font-size: clamp(28px, 7vh, 54px);
-  line-height: 1.05;
+  font-size: clamp(30px, 10.5vh, 60px);
+  line-height: 1.08;
   margin: 0;
-  max-width: 20ch;
+  max-width: 100%;
+  text-wrap: balance;
 }
 
 .accent {
@@ -64,13 +65,13 @@
 .progress .segment {
   flex: 1;
   height: 1.5px;
-  background: rgba(245, 240, 225, 0.2);
+  background: rgba(245, 240, 225, 0.14);
   border-radius: 1px;
 }
 
 .progress .segment.filled {
   background: var(--gold);
-  opacity: 0.6;
+  opacity: 0.5;
 }
 
 /* Navegación: flecha dorada visible a la derecha, flecha casi invisible a la izquierda. */

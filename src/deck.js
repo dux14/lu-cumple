@@ -51,7 +51,7 @@ export function createDeck({ root, uiRoot, slides, sky }) {
 
   function updateUi() {
     progressBar.render(progressModel(state.index))
-    controls.setVisible(state.index > 0)
+    controls.setVisible(state.index > 0, state.index < slides.length - 1)
   }
 
   function mount() {

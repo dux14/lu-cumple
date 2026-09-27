@@ -60,8 +60,8 @@ export function createControls({ uiRoot, onNext, onPrev }) {
   window.addEventListener('pointerup', onPointerUp)
   window.addEventListener('keydown', onKeyDown)
 
-  function setVisible(visible) {
-    nextBtn.style.display = visible ? 'flex' : 'none'
+  function setVisible(visible, hasNext = true) {
+    nextBtn.style.display = visible && hasNext ? 'flex' : 'none'
     prevBtn.style.display = visible ? 'flex' : 'none'
   }
 
