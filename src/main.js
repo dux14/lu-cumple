@@ -2,6 +2,7 @@
 import './styles/tokens.css'
 import './styles/base.css'
 import './styles/deck.css'
+import './styles/trip.css'
 import { createSky } from './sky.js'
 import { createDeck } from './deck.js'
 import { initOrientation } from './orientation.js'

@@ -1,11 +1,12 @@
 // Las 22 slides + slide 0. Simples se declaran como datos con `textSlide`;
-// especiales (0, 3) viven en su propio archivo. Textos y actos según
+// especiales (0, 3, 18, 19) viven en su propio archivo. Textos y actos según
 // docs/superpowers/specs/2026-09-27-lu-cumple-base-design.md — tabla
 // "Estructura". Placeholders entre corchetes: quedan para entregas
-// posteriores (chiste hot, oración, dedicatoria, carta, intro épica y
-// tarjeta de embarque).
+// posteriores (chiste hot, oración, dedicatoria, carta).
 import { slide00 } from './00-rotate.js'
 import { slide03 } from './03-collage.js'
+import { slide18 } from './18-flight.js'
+import { slide19 } from './19-boarding.js'
 import { textSlide } from './text-slide.js'
 
 export const slides = [
@@ -125,16 +126,8 @@ export const slides = [
   }),
 
   // 18–19 · Sorpresa
-  textSlide({
-    id: '18-intro-epica',
-    act: 'sorpresa',
-    lines: ['[Intro épica: vuelo Bogotá → Madrid]'],
-  }),
-  textSlide({
-    id: '19-tarjeta',
-    act: 'sorpresa',
-    lines: ['[Tarjeta de embarque + calendario]'],
-  }),
+  slide18,
+  slide19,
 
   // 20–22 · Cierre
   textSlide({

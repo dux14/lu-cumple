@@ -1,0 +1,328 @@
+/* Slides 18–19: intro épica del vuelo + revelación de la sorpresa. */
+
+/* ---------- 18 · intro épica ---------- */
+.slide-flight {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+}
+
+.flight-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.flight-trail {
+  stroke: var(--lilac);
+  stroke-width: 0.45;
+  stroke-dasharray: 0.7 1.8;
+  stroke-linecap: round;
+  opacity: 0.85;
+}
+
+.flight-plane path {
+  fill: var(--white);
+}
+
+.flight-flag {
+  position: absolute;
+  left: 7%;
+  top: 78%;
+  transform: translate(-50%, -50%);
+  font-size: clamp(20px, 5vh, 28px);
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5));
+}
+
+.flight-flag-end {
+  left: 93%;
+}
+
+.flight-teaser {
+  position: absolute;
+  left: 50%;
+  bottom: 14%;
+  transform: translateX(-50%);
+  width: 90%;
+  text-align: center;
+}
+
+/* ---------- 19 · revelación ---------- */
+.slide-boarding {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+}
+
+.step-scene {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: max(22px, env(safe-area-inset-top)) max(58px, env(safe-area-inset-right))
+    max(20px, env(safe-area-inset-bottom)) max(58px, env(safe-area-inset-left));
+}
+
+/* Tarjeta de embarque */
+.boarding-pass {
+  display: flex;
+  width: 72%;
+  max-width: 560px;
+  background: var(--night);
+  border: 1px solid color-mix(in srgb, var(--lilac) 35%, transparent);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+}
+
+.boarding-pass-compact {
+  width: 66%;
+  max-width: 480px;
+}
+
+.boarding-pass-compact .pass-value {
+  font-size: clamp(9px, 2.3vh, 12px);
+}
+
+.pass-main {
+  flex: 1;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+}
+
+.pass-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.pass-airline {
+  font-family: var(--f-text);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.55;
+}
+
+.pass-passenger {
+  font-family: var(--f-text);
+  font-size: 11px;
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+.pass-route {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pass-code {
+  font-family: var(--f-display);
+  font-weight: 800;
+  font-size: clamp(20px, 5.5vh, 30px);
+  letter-spacing: -0.01em;
+}
+
+.pass-route-arrow {
+  color: var(--rose);
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.pass-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px 10px;
+}
+
+.pass-eyebrow {
+  font-family: var(--f-text);
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.5;
+  margin: 0;
+}
+
+.pass-value {
+  font-family: var(--f-text);
+  font-size: clamp(10px, 2.6vh, 13px);
+  font-weight: 600;
+  margin: 1px 0 0;
+}
+
+.pass-stub {
+  width: 30%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 12px;
+  border-left: 2px dashed color-mix(in srgb, var(--lilac) 45%, transparent);
+  position: relative;
+}
+
+.pass-stub::before,
+.pass-stub::after {
+  content: '';
+  position: absolute;
+  left: -8px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--black);
+}
+
+.pass-stub::before {
+  top: -8px;
+}
+
+.pass-stub::after {
+  bottom: -8px;
+}
+
+/* Anotaciones a mano */
+.hand-note {
+  position: absolute;
+  font-family: var(--f-hand);
+  font-weight: 600;
+  color: var(--rose);
+  line-height: 1.15;
+  text-align: left;
+}
+
+.hand-note p {
+  margin: 0;
+  font-size: clamp(15px, 4vh, 20px);
+}
+
+.note-seat {
+  right: 6%;
+  top: 12%;
+  transform: rotate(-3deg);
+}
+
+.note-seat .hand-arrow {
+  width: 42px;
+  height: 28px;
+  color: var(--rose);
+  transform: scaleX(-1) rotate(6deg);
+  margin: 2px 0 0 auto;
+}
+
+.note-arrival {
+  left: 8%;
+  bottom: 14%;
+  transform: rotate(2deg);
+}
+
+/* Escena 1: regreso */
+.pass-recap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  opacity: 0.7;
+}
+
+.pass-recap .pass-code {
+  font-size: clamp(14px, 3.2vh, 18px);
+}
+
+.pass-recap-label {
+  font-family: var(--f-text);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-left: 4px;
+}
+
+/* Escena 2: calendario */
+.cal-wrap {
+  display: flex;
+  gap: 22px;
+  align-items: flex-start;
+}
+
+.cal-month {
+  width: 165px;
+}
+
+.cal-title {
+  font-family: var(--f-text);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: capitalize;
+  text-align: center;
+  margin: 0 0 8px;
+  opacity: 0.85;
+}
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.cal-weekday {
+  font-family: var(--f-text);
+  font-size: 8px;
+  text-align: center;
+  opacity: 0.45;
+  padding-bottom: 2px;
+}
+
+.cal-day {
+  font-family: var(--f-text);
+  font-size: 10px;
+  text-align: center;
+  line-height: 20px;
+  height: 20px;
+  border-radius: 50%;
+  opacity: 0.75;
+}
+
+.cal-day-empty {
+  opacity: 0;
+}
+
+.cal-day-range {
+  background: color-mix(in srgb, var(--rose) 55%, transparent);
+  opacity: 1;
+  font-weight: 600;
+}
+
+.cal-day-edge {
+  background: var(--rose);
+  font-size: 9px;
+  opacity: 1;
+}
+
+.cal-caption {
+  margin-top: 16px;
+}
+
+/* Escena 3: cierre + cuenta regresiva */
+.scene-final .display {
+  margin-bottom: 10px;
+}
+
+.countdown-text {
+  font-family: var(--f-hand);
+  font-weight: 600;
+  color: var(--rose);
+  font-size: clamp(22px, 7vh, 36px);
+  margin: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flight-plane {
+    opacity: 0 !important;
+  }
+}
