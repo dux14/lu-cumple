@@ -127,5 +127,5 @@ export function createDeck({ root, uiRoot, slides, sky }) {
 
   mount()
 
-  return { start, advance, retreat }
+  return { start, advance, retreat, getIndex: () => state.index }
 }

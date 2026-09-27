@@ -120,3 +120,51 @@
   width: 16px;
   height: 16px;
 }
+
+/* Slide 0 y overlay de orientation.js: diseñados para vertical. */
+.slide-vertical,
+.orientation-overlay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.orientation-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  background: radial-gradient(circle at 50% 40%, var(--night-3), var(--night) 70%);
+}
+
+.rotate-content .body {
+  max-width: 28ch;
+}
+
+.phone-icon {
+  width: 26px;
+  height: 44px;
+  border: 2px solid var(--gold);
+  border-radius: 6px;
+  margin-bottom: 24px;
+  animation: rotate-phone 2.6s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+@keyframes rotate-phone {
+  0% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-90deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .phone-icon {
+    animation: none;
+  }
+}
