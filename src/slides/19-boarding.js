@@ -194,7 +194,7 @@ export const slide19 = {
     scene0.className = 'step-scene scene-outbound'
     scene0.dataset.scene = '0'
     const { card: outCard, stub: outStub } = renderBoardingPass(outbound)
-    const seatNote = renderAnnotation('pasillo: baño fácil', 'y nadie te molesta')
+    const seatNote = renderAnnotation('pasillo: baño fácil y nadie te molesta', '14, mi número favorito')
     seatNote.classList.add('note-seat')
     seatNote.appendChild(noteArrow())
     const arrivalNote = renderAnnotation('te recojo a las 23:25 🌙')
@@ -285,6 +285,7 @@ export const slide19 = {
             gravity: 0.6,
             colors: CONFETTI_COLORS,
             origin: { x: 0.5, y: 0.4 },
+            disableForReducedMotion: true,
           })
         },
         null,
@@ -293,6 +294,17 @@ export const slide19 = {
     } else {
       stopCountdown(el)
     }
+  },
+  // Retroceso desde la slide 20: muestra directo la escena del paso sin
+  // recorrer las anteriores ni repetir el confeti.
+  enterAtStep(el, step, ctx) {
+    const { scenes, outCard, outStub, seatNote, arrivalNote, countdownEl } = el._boarding
+    gsap.set(outCard, { opacity: 1, y: 0 })
+    gsap.set(outStub, { rotate: 4, x: 6, y: -2 })
+    gsap.set([seatNote, arrivalNote], { opacity: 1, y: 0 })
+    scenes.forEach((s, i) => gsap.set(s, { display: i === step ? 'flex' : 'none' }))
+    ctx.tl.to(scenes[step], { opacity: 1, duration: 0.4, ease: 'power2.out' })
+    if (step === 3) startCountdown(el, countdownEl)
   },
   leave(el) {
     stopCountdown(el)

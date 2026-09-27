@@ -94,11 +94,16 @@ export function createDeck({ root, uiRoot, slides, sky }) {
         currentTl = gsap.timeline()
         state = newState
         const slide = slides[state.index]
-        slide.enter(inEl, ctxFor(state.index, currentTl))
-        // Si se entra directo en un paso > 0 (retroceso entre slides con
-        // steps), revela los pasos previos sin esperar más navegación.
-        for (let i = 1; i <= state.step; i++) {
-          slide.showStep?.(inEl, i, ctxFor(state.index, currentTl))
+        if (state.step > 0 && slide.enterAtStep) {
+          // Slides por escenas: saltan directo al paso sin repetir los anteriores.
+          slide.enterAtStep(inEl, state.step, ctxFor(state.index, currentTl))
+        } else {
+          slide.enter(inEl, ctxFor(state.index, currentTl))
+          // Si se entra directo en un paso > 0 (retroceso entre slides con
+          // steps), revela los pasos previos sin esperar más navegación.
+          for (let i = 1; i <= state.step; i++) {
+            slide.showStep?.(inEl, i, ctxFor(state.index, currentTl))
+          }
         }
         busy = false
         updateUi()
