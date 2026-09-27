@@ -121,6 +121,10 @@
   height: 16px;
 }
 
+.mute.is-muted {
+  opacity: 0.15;
+}
+
 /* Slide 0 y overlay de orientation.js: diseñados para vertical. */
 .slide-vertical,
 .orientation-overlay {
