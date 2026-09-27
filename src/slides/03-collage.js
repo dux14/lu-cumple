@@ -118,7 +118,7 @@ export const slide03 = {
     let openingPointerId = null
     let pulseTween = gsap.to(slots[0].photo, {
       scale: 1.06,
-      boxShadow: '0 0 18px rgba(212, 175, 55, 0.6)',
+      boxShadow: '0 0 18px rgba(255, 92, 122, 0.6)',
       duration: 1,
       ease: 'sine.inOut',
       yoyo: true,

@@ -27,15 +27,15 @@ export function createProgressBar(container) {
         el.appendChild(seg)
         added.push(seg)
       }
-      gsap.set(added, { opacity: 0, boxShadow: '0 0 0px rgba(212, 175, 55, 0)' })
+      gsap.set(added, { opacity: 0, boxShadow: '0 0 0px rgba(255, 92, 122, 0)' })
       gsap.to(added, {
         opacity: 1,
-        boxShadow: '0 0 6px rgba(212, 175, 55, 0.8)',
+        boxShadow: '0 0 6px rgba(255, 92, 122, 0.8)',
         duration: 0.25,
         stagger: STAGGER,
         ease: 'power1.out',
         onComplete() {
-          gsap.to(added, { boxShadow: '0 0 0px rgba(212, 175, 55, 0)', duration: 0.4 })
+          gsap.to(added, { boxShadow: '0 0 0px rgba(255, 92, 122, 0)', duration: 0.4 })
         },
       })
     } else if (model.segments < current) {

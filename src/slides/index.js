@@ -40,7 +40,10 @@ export const slides = [
   textSlide({
     id: '05-programador',
     act: 'risas',
-    lines: ['El programador defectuoso', 'se está <span class="accent">arreglando</span>', 'de a pasos'],
+    lines: [
+      'El programador <span class="accent alt">defectuoso</span>',
+      'se está <span class="accent">arreglando</span> <span class="wiggle">de a pasos</span>',
+    ],
   }),
   textSlide({
     id: '06-chiste',

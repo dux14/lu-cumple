@@ -1,7 +1,18 @@
 // Fábrica de slides de texto: cubre la mayoría de las 22 slides.
 // `lines` es la frase principal en `.display` (acepta HTML para el `.accent`
-// en itálica dorada). `paragraphs`, si viene, define `steps` y se revela
+// en rosa manuscrito). `paragraphs`, si viene, define `steps` y se revela
 // uno por uno con `showStep`.
+
+// Tamaño automático según el largo del título (texto plano, sin markup):
+// ≤ 30 caracteres → grande, ≤ 70 → medio, más → chico. Evita desborde en
+// 852×393 y 844×390 con títulos largos.
+function sizeClassFor(lines) {
+  const plainLength = lines.join(' ').replace(/<[^>]+>/g, '').length
+  if (plainLength <= 30) return 'display-lg'
+  if (plainLength <= 70) return 'display-md'
+  return 'display-sm'
+}
+
 export function textSlide({ id, act, eyebrow, lines, note, paragraphs }) {
   const steps = paragraphs ? paragraphs.length : 1
 
@@ -18,7 +29,7 @@ export function textSlide({ id, act, eyebrow, lines, note, paragraphs }) {
         el.appendChild(p)
       }
       const h = document.createElement('h1')
-      h.className = 'display'
+      h.className = `display ${sizeClassFor(lines)}`
       h.innerHTML = lines.join('<br />')
       el.appendChild(h)
       if (note) {

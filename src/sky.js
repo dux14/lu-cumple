@@ -11,8 +11,9 @@ const LAYERS = [
 
 const MAX_STARS_PER_LAYER = 320
 const SEED = 20260927 // fija: el cielo es el mismo en cada visita
-const CREAM = [245, 240, 225]
-const GOLD = [212, 175, 55]
+const WHITE = [255, 255, 255]
+const LILAC = [201, 182, 255]
+const ROSE = [255, 92, 122]
 const FADE_RATE = 0.06 // por frame: qué tan rápido una estrella aparece/desaparece
 
 // PRNG determinista (mulberry32) para que el layout de estrellas no cambie.
@@ -96,11 +97,10 @@ export function createSky(canvas) {
     const visibleCount = Math.round(params.density * area)
     const driftPx = (params.speed * speedFactor * dt) / Math.max(width, 1)
 
-    const mix = [
-      CREAM[0] + (GOLD[0] - CREAM[0]) * params.warmth,
-      CREAM[1] + (GOLD[1] - CREAM[1]) * params.warmth,
-      CREAM[2] + (GOLD[2] - CREAM[2]) * params.warmth,
-    ]
+    // warmth 0..1: blanco → lila en la primera mitad, lila → rosa en la segunda.
+    const [from, to, t] =
+      params.warmth <= 0.5 ? [WHITE, LILAC, params.warmth * 2] : [LILAC, ROSE, (params.warmth - 0.5) * 2]
+    const mix = [from[0] + (to[0] - from[0]) * t, from[1] + (to[1] - from[1]) * t, from[2] + (to[2] - from[2]) * t]
 
     for (const star of stars) {
       // Drift hacia la izquierda, con wrap continuo.

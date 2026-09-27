@@ -1,15 +1,16 @@
-/* Tokens de diseño — Cielo nocturno. Única paleta del proyecto (ver CLAUDE.md). */
+/* Tokens de diseño — Cielo nocturno chill. Única paleta del proyecto (ver CLAUDE.md). */
 :root {
-  --night: #0b0f1f;
-  --night-2: #111935;
-  --night-3: #1c2650;
-  --gold: #d4af37;
-  --cream: #f5f0e1;
-  --dusk: #7c93c7;
-  --ink: #2a2f4f;
+  --black: #08060d;
+  --night: #140b22;
+  --plum: #3a1a4f;
+  --wine: #8c1d40;
+  --rose: #ff5c7a;
+  --lilac: #c9b6ff;
+  --white: #ffffff;
 
-  --f-display: 'Cormorant Garamond', serif;
-  --f-text: 'Manrope', sans-serif;
+  --f-display: 'Bricolage Grotesque', sans-serif;
+  --f-text: 'Bricolage Grotesque', sans-serif;
+  --f-hand: 'Caveat', cursive;
 
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 }
