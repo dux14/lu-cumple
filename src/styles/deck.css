@@ -45,6 +45,12 @@
   margin: 16px 0 0;
 }
 
+.body.note {
+  font-size: clamp(11px, 2.8vh, 14px);
+  opacity: 0.6;
+  margin-top: 8px;
+}
+
 /* Progreso: segmentos finos arriba, dentro de la safe area. */
 .progress {
   position: fixed;
@@ -171,4 +177,96 @@
   .phone-icon {
     animation: none;
   }
+}
+
+/* Slide 3: collage de fotos + lightbox. */
+.slide-collage {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+}
+
+.collage-lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.collage-path {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 0.08;
+  opacity: 0.5;
+}
+
+.polaroid-slot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+}
+
+.polaroid {
+  width: 92px;
+  height: 110px;
+  padding: 0;
+  border: none;
+  border-radius: 2px;
+  background: linear-gradient(155deg, var(--ink), var(--night-3));
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  position: relative;
+}
+
+.polaroid::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 16px;
+  background: var(--cream);
+}
+
+.polaroid.polaroid-full {
+  width: 100%;
+  height: 100%;
+  transform: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.polaroid.polaroid-full::after {
+  display: none;
+}
+
+.lightbox {
+  position: absolute;
+  inset: 0;
+  display: none;
+  z-index: 5;
+  background: var(--night);
+}
+
+.lightbox.is-open {
+  display: flex;
+}
+
+.lightbox-photo-slot {
+  width: 55%;
+  height: 100%;
+  position: relative;
+}
+
+.lightbox-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: max(24px, env(safe-area-inset-top)) max(32px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom))
+    24px;
+}
+
+.lightbox-caption {
+  font-size: clamp(22px, 5vh, 36px);
+  max-width: 16ch;
 }
