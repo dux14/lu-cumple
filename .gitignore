@@ -5,3 +5,7 @@ docs/
 CLAUDE.md
 .DS_Store
 .playwright-mcp/
+
+# Documentos privados (reserva de vuelo)
+*.pdf
+private/
