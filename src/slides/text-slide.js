@@ -3,6 +3,8 @@
 // en rosa manuscrito). `paragraphs`, si viene, define `steps` y se revela
 // uno por uno con `showStep`.
 
+import { gsap } from 'gsap'
+
 // Tamaño automático según el largo del título (texto plano, sin markup):
 // ≤ 30 caracteres → grande, ≤ 70 → medio, más → chico. Evita desborde en
 // 852×393 y 844×390 con títulos largos.
@@ -50,13 +52,18 @@ export function textSlide({ id, act, eyebrow, lines, note, paragraphs }) {
       }
       return el
     },
+    // El estado oculto se aplica en prepareEnter, antes de que el contenedor
+    // de la slide sea visible (ver deck.js). Si se aplicara acá, con
+    // `fromTo`, el texto ya visible por default parpadearía: aparece con el
+    // fade-in del contenedor y recién después enter() lo oculta para
+    // volverlo a animar.
+    prepareEnter(el) {
+      const targets = el.querySelectorAll('.eyebrow, .display, .note, [data-step="0"]')
+      gsap.set(targets, { opacity: 0, y: 10, filter: 'blur(4px)' })
+    },
     enter(el, ctx) {
       const targets = el.querySelectorAll('.eyebrow, .display, .note, [data-step="0"]')
-      ctx.tl.fromTo(
-        targets,
-        { opacity: 0, y: 10, filter: 'blur(4px)' },
-        { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.5, stagger: 0.12, ease: 'power2.out' },
-      )
+      ctx.tl.to(targets, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.5, stagger: 0.12, ease: 'power2.out' })
     },
     showStep(el, i, ctx) {
       const p = el.querySelector(`[data-step="${i}"]`)

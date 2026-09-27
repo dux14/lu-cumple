@@ -57,6 +57,7 @@ export function createDeck({ root, uiRoot, slides, sky }) {
   function mount() {
     currentEl = renderSlide(state.index)
     root.appendChild(currentEl)
+    slides[state.index].prepareEnter?.(currentEl)
     sky.setAura(slides[state.index].act, { duration: 0 })
     currentTl = gsap.timeline()
     slides[state.index].enter(currentEl, ctxFor(state.index, currentTl))
@@ -78,6 +79,10 @@ export function createDeck({ root, uiRoot, slides, sky }) {
 
     const inEl = renderSlide(newState.index)
     root.appendChild(inEl)
+    // El estado oculto inicial de enter() se aplica ya, mientras inEl todavía
+    // está en opacity:0 (fromTo de abajo): así no hay flash de texto visible
+    // antes de que la animación de enter() lo revele.
+    slides[newState.index].prepareEnter?.(inEl)
     sky.setAura(slides[newState.index].act)
 
     const tl = gsap.timeline({

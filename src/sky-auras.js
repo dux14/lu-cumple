@@ -3,7 +3,7 @@
 // twinkle: intensidad del titileo (0..1). warmth: mezcla crema→dorado (0..1).
 // brightness: multiplicador del alfa global.
 export const AURAS = {
-  apertura: { density: 0.9, speed: 2, twinkle: 0.3, warmth: 0.2, brightness: 0.8 },
+  apertura: { density: 1.1, speed: 2, twinkle: 0.3, warmth: 0.2, brightness: 0.8 },
   nosotros: { density: 1.4, speed: 4, twinkle: 0.5, warmth: 0.6, brightness: 1 },
   risas: { density: 1.4, speed: 10, twinkle: 0.8, warmth: 0.4, brightness: 1 },
   fe: { density: 1.0, speed: 1, twinkle: 0.2, warmth: 0.3, brightness: 0.6 },

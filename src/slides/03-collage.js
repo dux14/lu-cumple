@@ -95,18 +95,25 @@ export const slide03 = {
     el._collage = { svg, path, slots, lightbox, photoSlotFull, eyebrow, caption, body }
     return el
   },
-  enter(el, ctx) {
-    const { svg, path, slots } = el._collage
-    ctx.tl.fromTo(el, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: 'power2.out' })
-
+  // Ver la nota en text-slide.js: el estado oculto se aplica acá, antes de
+  // que el contenedor sea visible, para que enter() no lo revele dos veces.
+  prepareEnter(el) {
+    const { path, slots } = el._collage
+    gsap.set(el, { opacity: 0 })
     const len = path.getTotalLength()
     path.style.strokeDasharray = String(len)
     path.style.strokeDashoffset = String(len)
-    ctx.tl.to(path, { strokeDashoffset: 0, duration: 1.4, ease: 'power2.inOut' }, 0.1)
-
-    ctx.tl.fromTo(
+    gsap.set(
       slots.map((s) => s.photo),
       { opacity: 0, scale: 0.85, y: 8 },
+    )
+  },
+  enter(el, ctx) {
+    const { path, slots } = el._collage
+    ctx.tl.to(el, { opacity: 1, duration: 0.4, ease: 'power2.out' })
+    ctx.tl.to(path, { strokeDashoffset: 0, duration: 1.4, ease: 'power2.inOut' }, 0.1)
+    ctx.tl.to(
+      slots.map((s) => s.photo),
       { opacity: 1, scale: 1, y: 0, duration: 0.5, stagger: 0.08, ease: 'power2.out' },
       0.2,
     )

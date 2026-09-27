@@ -195,6 +195,11 @@
 
 .rotate-content .body {
   max-width: 28ch;
+  font-size: clamp(24px, 6vh, 28px);
+}
+
+.rotate-content .accent {
+  font-size: clamp(28px, 7.5vh, 34px);
 }
 
 .swipe-content .swipe-arrow {
@@ -234,11 +239,15 @@
 }
 
 .phone-icon {
-  width: 26px;
-  height: 44px;
+  width: 38px;
+  height: 64px;
   border: 2px solid var(--rose);
-  border-radius: 6px;
-  margin-bottom: 24px;
+  border-radius: 8px;
+  /* margin horizontal auto: es un div de ancho fijo dentro de
+     .rotate-content (que se ajusta al ancho del texto, más ancho que el
+     ícono), así que sin esto queda pegado al borde izquierdo en vez de
+     centrado sobre el texto. */
+  margin: 0 auto 24px;
   animation: rotate-phone 2.6s cubic-bezier(0.65, 0, 0.35, 1) infinite;
 }
 
