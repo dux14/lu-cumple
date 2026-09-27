@@ -1,0 +1,17 @@
+{
+  "name": "Para Lu",
+  "short_name": "Para Lu",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#08060D",
+  "theme_color": "#08060D",
+  "start_url": "/lu-cumple/",
+  "scope": "/lu-cumple/",
+  "icons": [
+    {
+      "src": "/lu-cumple/icons/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

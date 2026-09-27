@@ -18,6 +18,30 @@ export function renderRotateContent() {
   return wrap
 }
 
+// Fase de scroll real (táctil + horizontal, primera vez): reemplaza el
+// contenido de "gira tu teléfono" por el prompt de swipe. Ver scroll-start.js.
+export function renderSwipeContent() {
+  const wrap = document.createElement('div')
+  wrap.className = 'rotate-content swipe-content'
+
+  const arrow = document.createElement('div')
+  arrow.className = 'swipe-arrow'
+  arrow.textContent = '↑'
+  wrap.appendChild(arrow)
+
+  const text = document.createElement('p')
+  text.className = 'body'
+  text.innerHTML = 'Desliza hacia arriba<br /><span class="accent">para comenzar</span>'
+  wrap.appendChild(text)
+
+  const fallback = document.createElement('p')
+  fallback.className = 'body note swipe-fallback'
+  fallback.textContent = 'o toca para comenzar'
+  wrap.appendChild(fallback)
+
+  return wrap
+}
+
 export const slide00 = {
   id: '00-rotate',
   act: 'apertura',

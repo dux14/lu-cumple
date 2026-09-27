@@ -197,6 +197,42 @@
   max-width: 28ch;
 }
 
+.swipe-content .swipe-arrow {
+  font-family: var(--f-text);
+  font-size: 32px;
+  line-height: 1;
+  color: var(--rose);
+  margin-bottom: 20px;
+  animation: swipe-bob 1.6s ease-in-out infinite;
+}
+
+@keyframes swipe-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(-10px);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .swipe-content .swipe-arrow {
+    animation: none;
+  }
+}
+
+.swipe-fallback {
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.swipe-fallback.is-visible {
+  opacity: 0.6;
+}
+
 .phone-icon {
   width: 26px;
   height: 44px;

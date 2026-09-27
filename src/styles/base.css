@@ -50,3 +50,39 @@ body {
 #ui > * {
   pointer-events: auto;
 }
+
+/* Fase de scroll real (ver src/scroll-start.js): habilita scroll de
+   documento para que Safari iOS colapse su barra con un gesto real. El
+   deck/cielo/UI se quedan fijos al viewport para no moverse visualmente. */
+html.scroll-phase {
+  overflow-y: auto;
+}
+
+html.scroll-phase.scroll-locked {
+  overflow-y: hidden;
+}
+
+html.scroll-phase body {
+  position: static;
+  height: calc(100lvh + 120px);
+  overflow: visible;
+  touch-action: pan-y;
+}
+
+html.scroll-phase.scroll-locked body {
+  touch-action: none;
+}
+
+html.scroll-phase #sky,
+html.scroll-phase #deck,
+html.scroll-phase #ui {
+  position: fixed;
+  height: 100lvh;
+  touch-action: pan-y;
+}
+
+html.scroll-phase.scroll-locked #sky,
+html.scroll-phase.scroll-locked #deck,
+html.scroll-phase.scroll-locked #ui {
+  touch-action: none;
+}
