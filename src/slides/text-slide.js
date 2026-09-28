@@ -1,7 +1,10 @@
 // Fábrica de slides de texto: cubre la mayoría de las 22 slides.
 // `lines` es la frase principal en `.display` (acepta HTML para el `.accent`
-// en rosa manuscrito). `paragraphs`, si viene, define `steps` y se revela
-// uno por uno con `showStep`.
+// en rosa manuscrito) y, junto con `eyebrow`, es opcional: si no vienen, no
+// se renderiza título (uso: slides largas que abren directo con el texto).
+// `paragraphs` (acepta HTML) define `steps`: cada paso reemplaza al
+// anterior en vez de acumularse, apilados en la misma celda de grid
+// (`.steps-stack`) para que el layout no salte entre pasos de alto distinto.
 
 import { gsap } from 'gsap'
 
@@ -30,10 +33,12 @@ export function textSlide({ id, act, eyebrow, lines, note, paragraphs }) {
         p.textContent = eyebrow
         el.appendChild(p)
       }
-      const h = document.createElement('h1')
-      h.className = `display ${sizeClassFor(lines)}`
-      h.innerHTML = lines.join('<br />')
-      el.appendChild(h)
+      if (lines) {
+        const h = document.createElement('h1')
+        h.className = `display ${sizeClassFor(lines)}`
+        h.innerHTML = lines.join('<br />')
+        el.appendChild(h)
+      }
       if (note) {
         const n = document.createElement('p')
         n.className = 'body note'
@@ -41,14 +46,17 @@ export function textSlide({ id, act, eyebrow, lines, note, paragraphs }) {
         el.appendChild(n)
       }
       if (paragraphs) {
-        paragraphs.forEach((text, i) => {
+        const stack = document.createElement('div')
+        stack.className = 'steps-stack'
+        paragraphs.forEach((html, i) => {
           const p = document.createElement('p')
           p.className = 'body'
           p.dataset.step = String(i)
           if (i > 0) p.style.opacity = '0'
-          p.textContent = text
-          el.appendChild(p)
+          p.innerHTML = html
+          stack.appendChild(p)
         })
+        el.appendChild(stack)
       }
       return el
     },
@@ -66,9 +74,18 @@ export function textSlide({ id, act, eyebrow, lines, note, paragraphs }) {
       ctx.tl.to(targets, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.5, stagger: 0.12, ease: 'power2.out' })
     },
     showStep(el, i, ctx) {
-      const p = el.querySelector(`[data-step="${i}"]`)
-      if (!p) return
-      ctx.tl.fromTo(p, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' })
+      const curr = el.querySelector(`[data-step="${i}"]`)
+      if (!curr) return
+      const prev = el.querySelector(`[data-step="${i - 1}"]`)
+      if (prev) {
+        ctx.tl.to(prev, { opacity: 0, y: -10, filter: 'blur(4px)', duration: 0.3, ease: 'power2.in' })
+      }
+      ctx.tl.fromTo(
+        curr,
+        { opacity: 0, y: 10, filter: 'blur(4px)' },
+        { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.4, ease: 'power2.out' },
+        prev ? '-=0.1' : undefined,
+      )
     },
   }
 }

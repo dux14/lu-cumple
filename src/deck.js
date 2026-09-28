@@ -1,9 +1,13 @@
 // Orquesta el DOM y GSAP sobre el estado puro de src/core/nav.js.
+// Una slide puede definir `onNav(dir)` ('next' | 'prev') para capturar la
+// navegación (p. ej. un modo lectura interno): si devuelve true, ni el
+// estado del deck ni la animación se tocan.
 import { gsap } from 'gsap'
 import { next as navNext, prev as navPrev } from './core/nav.js'
 import { progressModel } from './core/progress.js'
 import { createProgressBar } from './ui/progress-bar.js'
 import { createControls } from './ui/controls.js'
+import { isWarpTransition, suspenseLevel } from './core/suspense.js'
 
 const OUT_DURATION = 0.3
 const IN_DURATION = 0.6
@@ -12,8 +16,9 @@ function clamp(n, min, max) {
   return Math.max(min, Math.min(max, n))
 }
 
-export function createDeck({ root, uiRoot, slides, sky }) {
+export function createDeck({ root, uiRoot, slides, sky, audio, nebula }) {
   const steps = slides.map((s) => s.steps ?? 1)
+  const acts = slides.map((s) => s.act)
 
   const params = new URLSearchParams(window.location.search)
   const devStart = params.get('s')
@@ -40,7 +45,41 @@ export function createDeck({ root, uiRoot, slides, sky }) {
         locked = value
       },
       sky,
+      nebula,
+      progress: progressBar,
+      audio,
     }
+  }
+
+  // Cielo + nebulosa según el acto de `index` (ver src/core/suspense.js):
+  // 'suspenso' pasa por setSuspense/setSuspenseLevel con el nivel 1..4 de
+  // la slide; el resto usa el aura/nebulosa plana del acto.
+  function setSceneAt(index, opts) {
+    const act = acts[index]
+    if (act === 'suspenso') {
+      const level = suspenseLevel(acts, index)
+      sky.setSuspense(level, opts)
+      nebula.setSuspenseLevel(level, opts)
+    } else {
+      sky.setAura(act, opts)
+      nebula.setAct(act, opts)
+    }
+  }
+
+  // Cambio de escena en una transición entre slides: warp si se sale de
+  // 'suspenso' hacia adelante (17→18), si no la escena normal del acto que
+  // entra, con una estrella fugaz cuando el acto cambia (puntuación entre
+  // capítulos, no en cada slide).
+  function applyScene(newState, direction) {
+    const fromAct = acts[state.index]
+    const toAct = acts[newState.index]
+    if (isWarpTransition({ fromAct, toAct, direction })) {
+      sky.warpTo(toAct)
+      nebula.warpTo(toAct)
+      return
+    }
+    setSceneAt(newState.index)
+    if (toAct !== fromAct) gsap.delayedCall(0.25, () => sky.shootingStar())
   }
 
   function renderSlide(index) {
@@ -58,7 +97,10 @@ export function createDeck({ root, uiRoot, slides, sky }) {
     currentEl = renderSlide(state.index)
     root.appendChild(currentEl)
     slides[state.index].prepareEnter?.(currentEl)
-    sky.setAura(slides[state.index].act, { duration: 0 })
+    setSceneAt(state.index, { duration: 0 })
+    // Sin dirección real (no es una navegación 'next'/'prev'): evita que un
+    // cue de tipo 'jump' salte "raro" al entrar directo por `?s=N`.
+    audio.onSlide?.(slides[state.index].id, null)
     currentTl = gsap.timeline()
     slides[state.index].enter(currentEl, ctxFor(state.index, currentTl))
     updateUi()
@@ -83,7 +125,8 @@ export function createDeck({ root, uiRoot, slides, sky }) {
     // está en opacity:0 (fromTo de abajo): así no hay flash de texto visible
     // antes de que la animación de enter() lo revele.
     slides[newState.index].prepareEnter?.(inEl)
-    sky.setAura(slides[newState.index].act)
+    applyScene(newState, direction)
+    audio.onSlide?.(slides[newState.index].id, direction === 'forward' ? 'next' : 'prev')
 
     const tl = gsap.timeline({
       onComplete() {
@@ -120,6 +163,7 @@ export function createDeck({ root, uiRoot, slides, sky }) {
 
   function advance() {
     if (busy || locked) return
+    if (slides[state.index].onNav?.('next')) return
     const newState = navNext(state, steps)
     if (newState === state) return
     if (newState.index === state.index) applyStepChange(newState)
@@ -128,6 +172,7 @@ export function createDeck({ root, uiRoot, slides, sky }) {
 
   function retreat() {
     if (busy || locked) return
+    if (slides[state.index].onNav?.('prev')) return
     const newState = navPrev(state, steps)
     if (newState === state) return
     if (newState.index === state.index) applyStepChange(newState)

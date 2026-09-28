@@ -1,0 +1,17 @@
+/* ---------- 12 · "¿O no????" ---------- */
+.slide-o-no {
+  position: absolute;
+  inset: 0;
+}
+
+.o-no-title .accent {
+  display: inline-flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.o-no-w,
+.o-no-q {
+  display: inline-block;
+}

@@ -1,0 +1,38 @@
+/* ---------- 11 · "Y con esto acabamos" (apagón de TV) ---------- */
+.slide-acabamos {
+  position: absolute;
+  inset: 0;
+}
+
+.acabamos-title {
+  transform-origin: 50% 50%;
+}
+
+/* Línea horizontal en la que colapsa el texto, como una TV vieja al
+   apagarse (mismos valores que el mockup aprobado, en unidades relativas). */
+.acabamos-tv {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(65vw, 560px);
+  height: 3px;
+  margin: -1.5px 0 0 min(-32.5vw, -280px);
+  transform-origin: 50% 50%;
+  background: #fff;
+  border-radius: 3px;
+  box-shadow: 0 0 12px 3px rgba(255, 255, 255, 0.67), 0 0 34px 8px rgba(201, 182, 255, 0.33);
+  opacity: 0;
+}
+
+.acabamos-tvdot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 10px 4px rgba(255, 255, 255, 0.8), 0 0 26px 8px rgba(201, 182, 255, 0.4);
+  opacity: 0;
+}

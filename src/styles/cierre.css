@@ -1,0 +1,76 @@
+/* Slide 22 (cierre): título arriba + constelación del «22» en SVG.
+   Pensado para caber completo en 100dvh, incluido 852×320 apaisado bajo. */
+
+.slide-cierre {
+  justify-content: flex-start;
+  padding-top: max(28px, env(safe-area-inset-top));
+}
+
+.cierre-title {
+  flex: 0 0 auto;
+}
+
+.cierre-constellation-wrap {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.cierre-svg {
+  width: min(88%, 320px);
+  height: auto;
+  max-height: 52dvh;
+  overflow: visible;
+}
+
+.cierre-star {
+  fill: var(--white);
+  filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.9));
+}
+
+.cierre-star.is-lilac {
+  fill: var(--lilac);
+  filter: drop-shadow(0 0 2px rgba(201, 182, 255, 0.9));
+}
+
+.cierre-star.is-rose {
+  fill: var(--rose);
+  filter: drop-shadow(0 0 2px rgba(255, 92, 122, 0.9));
+}
+
+.cierre-star[data-special] {
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 1));
+}
+
+.cierre-line {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.7);
+  stroke-width: 0.6;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 2px rgba(201, 182, 255, 0.6));
+}
+
+.cierre-shoot {
+  stroke: var(--white);
+  stroke-width: 0.8;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.9));
+}
+
+.cierre-replay {
+  flex: 0 0 auto;
+  margin-top: 6px;
+  padding: 4px 0;
+  background: none;
+  border: none;
+  font-family: var(--f-text);
+  font-size: 11px;
+  color: var(--lilac);
+  opacity: 0;
+  cursor: pointer;
+}

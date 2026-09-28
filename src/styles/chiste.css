@@ -1,0 +1,58 @@
+/* Slide 5 (chiste hot): velo vino sobre texto borroso, se destapa con
+   mantener presionado. Ver src/slides/05-chiste.js. */
+
+.slide-chiste {
+  overflow: hidden;
+}
+
+/* "Sonrojo" de la nebulosa local a la slide (no toca el cielo global):
+   un resplandor vino que crece mientras se mantiene presionado. */
+.chiste-blush {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0;
+  background: radial-gradient(ellipse 70% 60% at 50% 55%, color-mix(in srgb, var(--wine) 60%, transparent), transparent 72%);
+  pointer-events: none;
+}
+
+.chiste-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(20px, 6vh, 36px) clamp(24px, 8vw, 48px);
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--night) 70%, transparent);
+  border: 1px solid color-mix(in srgb, var(--lilac) 30%, transparent);
+  touch-action: none;
+}
+
+.chiste-text {
+  margin: 0;
+  transition: none;
+}
+
+.chiste-veil {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: inherit;
+  background: color-mix(in srgb, var(--wine) 55%, var(--black) 45%);
+}
+
+.chiste-veil-label {
+  font-family: var(--f-text);
+  font-size: clamp(12px, 3.6vh, 15px);
+  font-weight: 500;
+  color: var(--white);
+  opacity: 0.85;
+  text-align: center;
+  padding: 0 12px;
+}
+
+.chiste-wrap.is-held .chiste-veil-label {
+  opacity: 0;
+}

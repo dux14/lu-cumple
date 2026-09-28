@@ -94,6 +94,18 @@
   margin-top: 8px;
 }
 
+/* Pasos de texto largo (carta, dedicatoria): todos en la misma celda de
+   grid para que el paso entrante y el saliente no muevan el layout. */
+.steps-stack {
+  display: grid;
+  margin-top: 16px;
+}
+
+.steps-stack .body {
+  grid-area: 1 / 1;
+  margin: 0;
+}
+
 /* Progreso: segmentos finos arriba, dentro de la safe area. */
 .progress {
   position: fixed;

@@ -1,0 +1,70 @@
+/* Slide 21 (locuras): lista de pendientes tocable, con tachado a mano y
+   estrella que se enciende. Ver src/slides/21-locuras.js. */
+
+.locuras-list {
+  list-style: none;
+  margin: clamp(14px, 3.4vh, 22px) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 2vh, 14px);
+  max-width: 68ch;
+  width: 100%;
+}
+
+.locuras-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-family: var(--f-text);
+  font-size: clamp(14px, 4vh, 18px);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.locuras-star {
+  color: var(--lilac);
+  opacity: 0.3;
+  font-size: 0.9em;
+  transition: opacity 0.3s ease, color 0.3s ease;
+}
+
+.locuras-item.is-done .locuras-star {
+  color: var(--rose);
+  opacity: 1;
+}
+
+.locuras-text {
+  position: relative;
+  opacity: 0.9;
+}
+
+.locuras-item.is-done .locuras-text {
+  opacity: 0.55;
+}
+
+/* Trazo a mano que tacha el ítem: una línea ligeramente inclinada que
+   crece de izquierda a derecha al marcar. */
+.locuras-text::after {
+  content: '';
+  position: absolute;
+  left: -2%;
+  right: 102%;
+  top: 52%;
+  height: 2px;
+  background: var(--rose);
+  border-radius: 2px;
+  transform: rotate(-1.5deg);
+  transition: right 0.35s ease;
+}
+
+.locuras-item.is-done .locuras-text::after {
+  right: -2%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .locuras-text::after {
+    transition: none;
+  }
+}

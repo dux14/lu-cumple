@@ -1,0 +1,16 @@
+/* Nebulosa de fondo por acto (ver src/nebula.js) y su destello de warp.
+   #nebula reemplaza el gradiente estático que traía body en base.css. */
+
+#nebula {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.nebula-flash {
+  position: fixed;
+  inset: 0;
+  background: #ffffff;
+  opacity: 0;
+  pointer-events: none;
+}

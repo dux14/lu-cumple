@@ -11,9 +11,9 @@ body {
   padding: 0;
   overflow: hidden;
   overscroll-behavior: none;
-  background: radial-gradient(ellipse 65% 55% at 15% 10%, color-mix(in srgb, var(--plum) 50%, transparent), transparent 70%),
-    radial-gradient(ellipse 55% 50% at 92% 95%, color-mix(in srgb, var(--wine) 35%, transparent), transparent 70%),
-    radial-gradient(ellipse at 50% 50%, var(--night), var(--black) 75%);
+  /* El nebulado ya no es estático: lo pinta #nebula por acto (ver
+     src/nebula.js y src/styles/nebula.css). Este color de fondo solo cubre
+     el instante antes de que JS pinte la primera capa. */
   background-color: var(--black);
   color: var(--white);
   font-family: var(--f-text);

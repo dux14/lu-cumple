@@ -1,0 +1,128 @@
+/* Slide 6 (programador): terminal CSS que "compila al novio".
+   Ver src/slides/06-programador.js y la referencia visual en
+   docs/superpowers/mockups/propuestas-fuertes.html ("Terminal de la 5"). */
+
+.slide-programador {
+  gap: clamp(14px, 3.4vh, 22px);
+}
+
+.term-title {
+  margin: 0 0 clamp(4px, 1.6vh, 10px);
+}
+
+.term {
+  position: relative;
+  width: min(600px, 86vw);
+  text-align: left;
+  background: color-mix(in srgb, var(--night) 92%, transparent);
+  border: 1px solid color-mix(in srgb, var(--lilac) 35%, transparent);
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.term-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 12px;
+  border-bottom: 1px solid color-mix(in srgb, var(--lilac) 15%, transparent);
+  font: 400 11px var(--f-mono);
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.term-head i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.term-head i:nth-child(1) {
+  background: var(--rose);
+}
+
+.term-head i:nth-child(2) {
+  background: var(--lilac);
+}
+
+.term-head span {
+  margin: 0 auto;
+  transform: translateX(-16px);
+}
+
+.term-body {
+  padding: 10px 16px 14px;
+  font: 400 13.5px/1.6 var(--f-mono);
+  color: #e9e3f5;
+  min-height: 118px;
+}
+
+.term-line {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.term-pr {
+  color: var(--rose);
+  font-weight: 700;
+}
+
+.term-ok {
+  color: var(--lilac);
+}
+
+.term-warn {
+  color: var(--rose);
+}
+
+.term-dim {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.term-bar-row {
+  margin-top: 4px;
+}
+
+.term-bar {
+  display: inline-block;
+  vertical-align: -2px;
+  width: 140px;
+  height: 12px;
+  border: 1px solid color-mix(in srgb, var(--lilac) 40%, transparent);
+  border-radius: 3px;
+  margin: 0 6px;
+  overflow: hidden;
+}
+
+.term-bar b {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: repeating-linear-gradient(90deg, var(--rose) 0 10px, var(--black) 10px 12px);
+}
+
+/* Hueco del sticker del muchacho: oculto hasta que llegue la imagen.
+   Al agregarla, sumar `.term-sticker--ready` (no antes: sin imagen no se
+   muestra ningún círculo punteado de relleno). */
+.term-sticker {
+  display: none;
+  position: absolute;
+  right: -18px;
+  top: -34px;
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  overflow: hidden;
+  transform: rotate(8deg);
+}
+
+.term-sticker--ready {
+  display: block;
+}
+
+.term-sticker img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

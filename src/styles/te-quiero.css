@@ -1,0 +1,29 @@
+/* Slide 10 ("Te quierooooooo…"): las "o" empujan el texto fuera del
+   borde derecho. Ver src/slides/10-te-quiero.js. */
+
+.slide-te-quiero {
+  overflow: hidden;
+}
+
+.tq-line {
+  display: block;
+  white-space: nowrap;
+  max-width: none;
+  margin: 0;
+}
+
+.tq-dots {
+  animation: tq-blink 1.1s steps(1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tq-dots {
+    animation: none;
+  }
+}
+
+@keyframes tq-blink {
+  50% {
+    opacity: 0.25;
+  }
+}

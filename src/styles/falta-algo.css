@@ -1,0 +1,20 @@
+/* Slide 13 ("¿Será que falta algo?"): flecha meta que sube hacia la barra
+   de progreso. Ver src/slides/13-falta-algo.js. */
+
+.slide-falta-algo {
+  gap: clamp(6px, 1.6vh, 12px);
+}
+
+.meta-arrow {
+  width: 28px;
+  height: clamp(56px, 16vh, 96px);
+  margin-top: clamp(4px, 1.4vh, 10px);
+}
+
+.meta-note {
+  font-family: var(--f-hand);
+  font-size: clamp(15px, 4.6vh, 20px);
+  color: var(--lilac);
+  transform: rotate(-1.5deg);
+  margin: 0;
+}

@@ -9,6 +9,7 @@ export function createProgressBar(container) {
   el.className = 'progress'
   el.style.display = 'none'
   container.appendChild(el)
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
   function render(model) {
     if (!model.visible) {
@@ -50,5 +51,27 @@ export function createProgressBar(container) {
     })
   }
 
-  return { render }
+  // Cierre (22): la barra, ya completa, hace un último destello y se
+  // desvanece. `show` la restaura si se vuelve a la 21 (ver deck.js).
+  function flashOut() {
+    if (reduced) {
+      gsap.set(el, { opacity: 0 })
+      return
+    }
+    const segs = Array.from(el.children)
+    gsap
+      .timeline()
+      .to(segs, { boxShadow: '0 0 10px rgba(255, 92, 122, 0.9)', duration: 0.3, ease: 'power1.out' })
+      .to(el, { opacity: 0, duration: 0.6, ease: 'power1.in' }, '+=0.15')
+  }
+
+  function show() {
+    if (reduced) {
+      gsap.set(el, { opacity: 1 })
+      return
+    }
+    gsap.to(el, { opacity: 1, duration: 0.3, ease: 'power1.out' })
+  }
+
+  return { render, flashOut, show }
 }

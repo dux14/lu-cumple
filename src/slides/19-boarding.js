@@ -15,6 +15,7 @@ import confetti from 'canvas-confetti'
 import { outbound, inbound, passenger } from '../data/trip.js'
 import { countdownText, countdownDays } from '../core/countdown.js'
 import { createSplitFlap } from '../ui/split-flap.js'
+import { getMadridVideo } from '../core/madrid-bg.js'
 
 const MONTH_NAMES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
 const WEEKDAYS = ['L', 'M', 'X', 'J', 'V', 'S', 'D']
@@ -374,14 +375,11 @@ export const slide19 = {
     bgFlight.src = `${import.meta.env.BASE_URL}video/ventanilla.mp4`
     el.appendChild(bgFlight)
 
-    const bgMadrid = document.createElement('video')
+    // Compartido con la slide 20 (ver src/core/madrid-bg.js): un solo
+    // elemento <video>, reparentado en vez de recreado, para no descargar
+    // el archivo dos veces cuando el fondo se queda al pasar de la 19 a la 20.
+    const bgMadrid = getMadridVideo()
     bgMadrid.className = 'boarding-bg boarding-bg-madrid'
-    bgMadrid.muted = true
-    bgMadrid.loop = true
-    bgMadrid.playsInline = true
-    bgMadrid.preload = 'auto'
-    bgMadrid.poster = `${import.meta.env.BASE_URL}video/madrid.jpg`
-    bgMadrid.src = `${import.meta.env.BASE_URL}video/madrid.mp4`
     el.appendChild(bgMadrid)
 
     const madridShade = document.createElement('div')
