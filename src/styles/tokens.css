@@ -11,6 +11,7 @@
   --f-display: 'Bricolage Grotesque', sans-serif;
   --f-text: 'Bricolage Grotesque', sans-serif;
   --f-hand: 'Caveat', cursive;
+  --f-mono: 'JetBrains Mono', monospace;
 
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 }

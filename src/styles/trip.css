@@ -1,51 +1,169 @@
-/* Slides 18–19: intro épica del vuelo + revelación de la sorpresa. */
+/* Slides 18–19: revelación cinematográfica del viaje.
+   Ventanilla (video) → tablero split-flap → tiquete holográfico → regreso →
+   12 días juntos → cierre sobre Madrid de noche con cuenta regresiva. */
 
-/* ---------- 18 · intro épica ---------- */
+/* ---------- split-flap (compartido 18 y 19) ---------- */
+.split-flap {
+  display: flex;
+  gap: clamp(2px, 0.5vh, 4px);
+}
+
+.flap {
+  position: relative;
+  width: clamp(20px, 5.5vh, 33px);
+  height: clamp(28px, 7.5vh, 45px);
+  perspective: 200px;
+  font-family: var(--f-mono);
+  font-weight: 700;
+  font-size: clamp(16px, 4.6vh, 30px);
+  line-height: clamp(28px, 7.5vh, 45px);
+  color: var(--white);
+  text-align: center;
+}
+
+/* Variante grande: cuenta regresiva del cierre (mockup cierre-madrid: 40×54,
+   letra 36px, fondo semitransparente). */
+.split-flap-lg .flap {
+  width: clamp(26px, 10.2vh, 40px);
+  height: clamp(34px, 13.7vh, 54px);
+  font-size: clamp(24px, 9.2vh, 36px);
+  line-height: clamp(34px, 13.7vh, 54px);
+}
+
+.split-flap-lg .flap-half,
+.split-flap-lg .flap-leaf {
+  background: #221b2bdd;
+}
+
+.flap-half {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 50%;
+  overflow: hidden;
+  background: #221b2b;
+  border-radius: 3px;
+}
+
+.flap-top {
+  top: 0;
+  border-bottom: 1px solid var(--black);
+}
+
+.flap-bot {
+  bottom: 0;
+}
+
+.flap-bot span {
+  display: block;
+  transform: translateY(-50%);
+}
+
+.flap-leaf {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 50%;
+  overflow: hidden;
+  background: #2a2234;
+  border-radius: 3px;
+  transform-origin: bottom;
+  backface-visibility: hidden;
+}
+
+.flap-rose .flap-half,
+.flap-rose .flap-leaf {
+  color: var(--rose);
+}
+
+.flap-lilac .flap-half,
+.flap-lilac .flap-leaf {
+  color: var(--lilac);
+}
+
+/* ---------- 18 · apertura + tablero ---------- */
 .slide-flight {
   position: absolute;
   inset: 0;
   padding: 0;
+  overflow: hidden;
 }
 
-.flight-svg {
+.flight-bg {
   position: absolute;
   inset: 0;
+  z-index: 0;
   width: 100%;
   height: 100%;
+  object-fit: cover;
 }
 
-.flight-trail {
-  stroke: var(--lilac);
-  stroke-width: 0.45;
-  stroke-dasharray: 0.7 1.8;
-  stroke-linecap: round;
+.flight-caption {
+  position: absolute;
+  z-index: 1;
+  left: 0;
+  right: 0;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  text-align: center;
+  font-family: var(--f-text);
+  font-size: clamp(11px, 3vh, 14px);
+  letter-spacing: 0.04em;
+  color: var(--lilac);
   opacity: 0.85;
 }
 
-.flight-plane path {
-  fill: var(--white);
-}
-
-.flight-flag {
+.flight-board {
   position: absolute;
-  left: 7%;
-  top: 78%;
+  z-index: 1;
+  left: 50%;
+  top: 48%;
   transform: translate(-50%, -50%);
-  font-size: clamp(28px, 9vh, 40px);
-  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5));
+  display: flex;
+  flex-direction: column;
+  gap: clamp(4px, 1.2vh, 8px);
+  padding: clamp(10px, 2.6vh, 18px) clamp(14px, 3vw, 22px);
+  border-radius: 14px;
+  background: linear-gradient(#141018, #0b090e);
+  box-shadow: inset 0 0 0 1px #2a2236, 0 20px 60px rgba(0, 0, 0, 0.6);
 }
 
-.flight-flag-end {
-  left: 93%;
+.flight-row {
+  display: flex;
+  align-items: center;
+  gap: clamp(8px, 2vw, 14px);
+}
+
+.flight-row-label {
+  width: clamp(52px, 8vw, 78px);
+  font-family: var(--f-text);
+  font-size: clamp(9px, 2vh, 11px);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: #8f84a3;
+  text-align: right;
 }
 
 .flight-teaser {
   position: absolute;
+  z-index: 1;
   left: 50%;
-  top: 64%;
+  top: 82%;
   transform: translate(-50%, -50%);
-  width: 70%;
+  width: 84%;
   text-align: center;
+}
+
+/* La "e" final de Caveat trae su propio remate: sin este aire, se monta
+   sobre el signo de interrogación que sigue. */
+.flight-teaser .accent {
+  padding-right: 0.14em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flight-board {
+    top: 46%;
+  }
 }
 
 /* ---------- 19 · revelación ---------- */
@@ -53,123 +171,154 @@
   position: absolute;
   inset: 0;
   padding: 0;
+  overflow: hidden;
+}
+
+.boarding-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.boarding-bg-flight {
+  filter: blur(7px) brightness(0.5);
+  transform: scale(1.08);
+}
+
+.boarding-bg-madrid {
+  filter: brightness(0.5) saturate(1.05);
+}
+
+.boarding-shade {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: radial-gradient(70% 80% at 50% 50%, rgba(8, 6, 13, 0.65) 0%, rgba(8, 6, 13, 0.15) 60%, rgba(8, 6, 13, 0.8) 100%);
 }
 
 .step-scene {
   position: absolute;
   inset: 0;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: max(22px, env(safe-area-inset-top)) max(58px, env(safe-area-inset-right))
-    max(20px, env(safe-area-inset-bottom)) max(58px, env(safe-area-inset-left));
+  padding: max(20px, env(safe-area-inset-top)) max(48px, env(safe-area-inset-right))
+    max(18px, env(safe-area-inset-bottom)) max(48px, env(safe-area-inset-left));
 }
 
-/* Tarjeta de embarque */
-.boarding-pass {
+/* Tiquete holográfico */
+.holo {
+  position: relative;
   display: flex;
-  width: 72%;
-  max-width: 560px;
-  background: var(--night);
-  border: 1px solid color-mix(in srgb, var(--lilac) 35%, transparent);
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  width: min(90vw, 780px);
+  height: clamp(170px, 66vh, 265px);
+  border-radius: 16px;
+  overflow: hidden;
+  transform-style: preserve-3d;
+  background: linear-gradient(135deg, #1d1128, #2b1238 55%, #3a1a4f);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.13);
+  --mx: 50%;
+  --my: 50%;
+  --gx: 50%;
+  --gy: 50%;
+  --stub-w: clamp(100px, 17vw, 150px);
 }
 
-.boarding-pass-compact {
-  width: 66%;
-  max-width: 480px;
-}
-
-.boarding-pass-compact .pass-value {
-  font-size: clamp(9px, 2.3vh, 12px);
-}
-
-.pass-main {
+.holo-main {
   flex: 1;
-  padding: 12px 16px;
+  position: relative;
+  z-index: 2;
+  padding: clamp(12px, 3vh, 20px) clamp(16px, 3vw, 24px);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  /* Centrado: reparte el aire arriba (antes de IATA) y abajo (después de
+     meta, antes de las notas), en vez de amontonar todo contra el techo. */
+  justify-content: center;
+  gap: clamp(14px, 4vh, 28px);
   text-align: left;
 }
 
-.pass-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
+/* Grilla de 3 columnas (origen / flecha / destino) compartida por la fila
+   de códigos IATA y la de ciudades: cada `.holo-row` es `display:contents`,
+   así sus 3 `span` caen en las mismas columnas y cada ciudad queda alineada
+   bajo su código, sin importar cuál texto es más ancho. */
+.holo-route {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  justify-content: start;
+  column-gap: clamp(8px, 2vw, 16px);
+  row-gap: clamp(2px, 0.6vh, 6px);
+  align-items: end;
 }
 
-.pass-airline {
-  font-family: var(--f-text);
-  font-size: 10px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  opacity: 0.55;
+.holo-row {
+  display: contents;
 }
 
-.pass-passenger {
-  font-family: var(--f-text);
-  font-size: 11px;
-  font-weight: 500;
-  opacity: 0.8;
-}
-
-.pass-route {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.pass-code {
+.holo-iata span:not(.holo-iata-arrow) {
   font-family: var(--f-display);
   font-weight: 800;
-  font-size: clamp(20px, 5.5vh, 30px);
-  letter-spacing: -0.01em;
+  font-size: clamp(38px, 19.8vh, 80px);
+  line-height: 0.9;
+  letter-spacing: -0.02em;
 }
 
-.pass-route-arrow {
+.holo-iata-arrow {
+  align-self: center;
   color: var(--rose);
-  font-size: 14px;
-  opacity: 0.8;
+  font-size: clamp(18px, 6.6vh, 31px);
 }
 
-.pass-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 6px 10px;
-}
-
-.pass-eyebrow {
+.holo-cities span {
   font-family: var(--f-text);
-  font-size: 8px;
+  font-size: clamp(10px, 2.7vh, 13px);
+  color: var(--lilac);
+  opacity: 0.9;
+}
+
+/* Separada de las ciudades por el `gap` de `.holo-main` (no por su propio
+   margen): así la separación crece con la tarjeta en vez de quedar fija. */
+.holo-meta {
+  display: flex;
+  gap: clamp(14px, 3.2vw, 26px);
+}
+
+.holo-eyebrow {
+  margin: 0;
+  font-family: var(--f-text);
+  font-size: clamp(9px, 2.4vh, 12px);
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  opacity: 0.5;
-  margin: 0;
+  color: #a89bbd;
 }
 
-.pass-value {
+.holo-value {
+  margin: 2px 0 0;
   font-family: var(--f-text);
-  font-size: clamp(10px, 2.6vh, 13px);
-  font-weight: 600;
-  margin: 1px 0 0;
+  font-weight: 700;
+  font-size: clamp(15px, 5.2vh, 22px);
+  color: var(--white);
 }
 
-.pass-stub {
-  width: 30%;
+.holo-stub {
+  width: var(--stub-w);
+  position: relative;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 10px;
-  padding: 12px 12px;
-  border-left: 2px dashed color-mix(in srgb, var(--lilac) 45%, transparent);
-  position: relative;
+  gap: clamp(6px, 1.6vh, 10px);
+  padding: clamp(10px, 2.4vh, 16px) clamp(10px, 2vw, 14px);
+  border-left: 2px dashed rgba(255, 255, 255, 0.2);
 }
 
-.pass-stub::before,
-.pass-stub::after {
+.holo-stub::before,
+.holo-stub::after {
   content: '';
   position: absolute;
   left: -8px;
@@ -179,112 +328,214 @@
   background: var(--black);
 }
 
-.pass-stub::before {
+.holo-stub::before {
   top: -8px;
 }
 
-.pass-stub::after {
+.holo-stub::after {
   bottom: -8px;
 }
 
-/* Anotaciones a mano */
+.holo-passenger {
+  margin: 0;
+  font-weight: 700;
+  font-size: clamp(11px, 2.6vh, 14px);
+}
+
+.holo-bar {
+  height: clamp(48px, 22vh, 90px);
+  margin-top: 4px;
+  border-radius: 3px;
+  opacity: 0.85;
+  background: repeating-linear-gradient(
+    90deg,
+    #fff 0 2px,
+    transparent 2px 4px,
+    #fff 4px 5px,
+    transparent 5px 9px,
+    #fff 9px 12px,
+    transparent 12px 14px
+  );
+}
+
+.holo-grain {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  opacity: 0.1;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.holo-foil {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  mix-blend-mode: color-dodge;
+  opacity: 0.55;
+  background: linear-gradient(115deg, transparent 20%, #ff5c7a55 35%, #c9b6ff77 45%, #7fffd455 52%, #ffe06655 60%, transparent 75%);
+  background-size: 250% 250%;
+  background-position: var(--gx) var(--gy);
+}
+
+.holo-glare {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  background: radial-gradient(circle at var(--mx) var(--my), rgba(255, 255, 255, 0.65) 0%, transparent 45%);
+}
+
+.holo-hint {
+  position: absolute;
+  bottom: max(10px, env(safe-area-inset-bottom));
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-family: var(--f-text);
+  font-size: clamp(10px, 2.4vh, 12px);
+  color: var(--lilac);
+  opacity: 0;
+}
+
+/* Anotaciones a mano sobre el tiquete de ida. Por encima del foil/glare
+   (z-index 4/5): si no, el brillo holográfico las tapa según el ángulo. */
 .hand-note {
   position: absolute;
+  z-index: 6;
   font-family: var(--f-hand);
   font-weight: 600;
   color: var(--rose);
-  line-height: 1.15;
+  line-height: 1.1;
   text-align: left;
 }
 
 .hand-note p {
   margin: 0;
-  font-size: clamp(15px, 4vh, 20px);
+  font-size: clamp(13px, 3.4vh, 18px);
+}
+
+/* `bottom` en px (no %): con % relativo al alto de la tarjeta, a 320 de
+   alto la nota rotada quedaba tan pegada al borde que el `overflow:hidden`
+   del `.holo` se la comía. */
+.note-arrival {
+  right: calc(var(--stub-w) + 4%);
+  bottom: clamp(6px, 3vh, 14px);
+  transform: rotate(-2deg);
+  text-align: right;
 }
 
 .note-seat {
-  right: 6%;
-  top: 12%;
-  transform: rotate(-3deg);
-}
-
-.note-seat .hand-arrow {
-  width: 42px;
-  height: 28px;
-  color: var(--rose);
-  transform: scaleX(-1) rotate(6deg);
-  margin: 2px 0 0 auto;
-}
-
-.note-arrival {
-  left: 8%;
-  bottom: 14%;
+  left: 5%;
+  bottom: clamp(6px, 3vh, 14px);
   transform: rotate(2deg);
 }
 
+/* A 852×320 (barra de Safari visible) la nota del asiento no cabe sin
+   solapar el resto: se omite, como pide el spec. */
+@media (max-height: 340px) {
+  .note-seat {
+    display: none;
+  }
+}
+
 /* Escena 1: regreso */
-.pass-recap {
+.holo-recap {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 14px;
+  margin-bottom: clamp(8px, 2vh, 14px);
   opacity: 0.7;
+  font-family: var(--f-display);
+  font-weight: 800;
 }
 
-.pass-recap .pass-code {
-  font-size: clamp(14px, 3.2vh, 18px);
+.holo-recap-code {
+  font-size: clamp(13px, 3vh, 17px);
 }
 
-.pass-recap-label {
+.holo-recap-arrow {
+  color: var(--rose);
+  font-size: 13px;
+}
+
+.holo-recap-label {
   font-family: var(--f-text);
+  font-weight: 500;
   font-size: 10px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   margin-left: 4px;
 }
 
-/* Escena 2: calendario */
+/* A 852×320 el recap no cabe arriba del tiquete grande sin solapar: se
+   quita, como pide el spec. */
+@media (max-height: 340px) {
+  .holo-recap {
+    display: none;
+  }
+}
+
+/* Escena 2: calendario. Panel casi a pantalla completa (~80-85% del ancho):
+   los dos meses reparten el ancho disponible con `flex: 1` en vez de un
+   ancho fijo, así crecen junto con el panel. */
+.cal-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: min(85vw, 760px);
+  padding: clamp(14px, 3.4vh, 26px) clamp(18px, 3.6vw, 32px);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--night) 80%, transparent);
+}
+
 .cal-wrap {
   display: flex;
-  gap: 22px;
+  width: 100%;
+  gap: clamp(20px, 4.4vw, 40px);
   align-items: flex-start;
 }
 
 .cal-month {
-  width: 165px;
+  flex: 1;
+  min-width: 0;
 }
 
 .cal-title {
   font-family: var(--f-text);
-  font-size: 11px;
+  font-size: clamp(12px, 3.2vh, 17px);
   font-weight: 600;
   text-transform: capitalize;
   text-align: center;
-  margin: 0 0 8px;
+  margin: 0 0 clamp(6px, 1.6vh, 10px);
   opacity: 0.85;
 }
 
+/* Sin gap: el rango pinta como banda continua (las celdas se tocan). Los
+   días sueltos no tienen fondo propio, así que la falta de gap entre ellos
+   no se nota. */
 .cal-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 2px;
+  gap: 0;
 }
 
 .cal-weekday {
   font-family: var(--f-text);
-  font-size: 8px;
+  font-size: clamp(9px, 2.2vh, 13px);
   text-align: center;
   opacity: 0.45;
-  padding-bottom: 2px;
+  padding-bottom: clamp(2px, 0.6vh, 4px);
 }
 
 .cal-day {
   font-family: var(--f-text);
-  font-size: 10px;
+  font-size: clamp(13px, 4.2vh, 18px);
   text-align: center;
-  line-height: 20px;
-  height: 20px;
-  border-radius: 50%;
+  line-height: clamp(22px, 6.2vh, 34px);
+  height: clamp(22px, 6.2vh, 34px);
   opacity: 0.75;
 }
 
@@ -292,37 +543,125 @@
   opacity: 0;
 }
 
+/* El rango arranca apagado (opacity 0): `calendarIntro`/`calendarFinalState`
+   lo prenden celda por celda con `.cal-day-lit`. Redondeado solo en las
+   puntas de cada tramo semanal (`.cal-range-start` / `.cal-range-end`): las
+   celdas del medio quedan a escuadra, pegadas, formando una banda. */
 .cal-day-range {
   background: color-mix(in srgb, var(--rose) 55%, transparent);
-  opacity: 1;
   font-weight: 600;
+  opacity: 0;
+  border-radius: 0;
+  transform: scale(1);
+}
+
+.cal-day-range.cal-day-lit {
+  opacity: 1;
+}
+
+.cal-range-start {
+  border-top-left-radius: 999px;
+  border-bottom-left-radius: 999px;
+}
+
+.cal-range-end {
+  border-top-right-radius: 999px;
+  border-bottom-right-radius: 999px;
 }
 
 .cal-day-edge {
   background: var(--rose);
-  font-size: 9px;
-  opacity: 1;
+  font-size: clamp(11px, 3.4vh, 15px);
 }
 
-.cal-caption {
-  margin-top: 16px;
+/* Halloween juntos: único uso de este naranja en todo el proyecto (ver
+   CLAUDE.md), reservado a este chiste puntual del 31 de octubre. */
+.cal-day-halloween {
+  background: #ff8a3d !important;
+  box-shadow: 0 0 10px rgba(255, 138, 61, 0.75);
+  font-size: clamp(13px, 4vh, 17px);
 }
 
-/* Escena 3: cierre + cuenta regresiva */
+.cal-halloween-note {
+  position: absolute;
+  z-index: 3;
+  transform: translate(-50%, 12%) rotate(-3deg);
+  text-align: center;
+  font-family: var(--f-hand);
+  font-weight: 600;
+  font-size: clamp(16px, 5.4vh, 22px);
+  color: #ff8a3d;
+  opacity: 0;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* Murciélagos: cruzan el panel una sola vez cuando la animación llega al
+   31 de octubre (ver `playBats` en 19-boarding.js). */
+.cal-bats {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.cal-bat {
+  position: absolute;
+  width: clamp(16px, 3vh, 22px);
+  height: clamp(9px, 1.7vh, 12px);
+  background: var(--black);
+  opacity: 0;
+  clip-path: polygon(0% 50%, 20% 0%, 35% 40%, 50% 10%, 65% 40%, 80% 0%, 100% 50%, 80% 35%, 50% 45%, 20% 35%);
+}
+
+/* Pisa el tamaño de `.display-sm` (misma especificidad, pero definida acá
+   después): la firma a mano del conteo debe leerse grande, como antes. */
+.display-sm.cal-caption {
+  font-size: clamp(24px, 11.2vh, 44px);
+  margin-top: clamp(14px, 3.2vh, 24px);
+}
+
+/* Escena 3: cierre sobre Madrid + cuenta regresiva */
 .scene-final .display {
-  margin-bottom: 10px;
+  margin-bottom: clamp(6px, 1.6vh, 12px);
+}
+
+.final-accent {
+  font-size: 1.2em;
+}
+
+.countdown-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .countdown-text {
-  font-family: var(--f-hand);
+  font-family: var(--f-text);
   font-weight: 600;
-  color: var(--rose);
-  font-size: clamp(22px, 7vh, 36px);
+  color: var(--white);
+  font-size: clamp(14px, 5.4vh, 22px);
   margin: 0;
 }
 
+.countdown-flap-line {
+  display: flex;
+  align-items: center;
+  gap: clamp(6px, 1.6vw, 10px);
+}
+
+.boarding-note {
+  margin-top: clamp(10px, 2vh, 16px);
+  font-family: var(--f-text);
+  font-size: clamp(11px, 2.6vh, 14px);
+  letter-spacing: 0.04em;
+  color: var(--lilac);
+  opacity: 0.85;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .flight-plane {
-    opacity: 0 !important;
+  .boarding-bg-madrid {
+    transform: none;
   }
 }

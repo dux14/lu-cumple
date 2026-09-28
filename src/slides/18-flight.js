@@ -1,19 +1,38 @@
-// Slide 18: intro épica. Automática (~4 s) y bloquea navegación con
-// ctx.lockNav mientras corre; al terminar aparece la flecha de siguiente.
+// Slide 18: apertura de la revelación. Automática (~7 s) y bloquea
+// navegación con ctx.lockNav mientras corre; al terminar aparece la flecha
+// de siguiente. Ventanilla en video → la cámara "entra" (blur + zoom) →
+// tablero split-flap con los datos del vuelo → frase final.
 // El cielo ya acelera solo: `sorpresa` es el aura más rápida (ver
 // src/sky-auras.js) y deck.js la aplica al entrar a la slide.
 import { gsap } from 'gsap'
-import { MotionPathPlugin } from 'gsap/MotionPathPlugin'
 import confetti from 'canvas-confetti'
+import { createSplitFlap } from '../ui/split-flap.js'
+import { outbound } from '../data/trip.js'
 
-gsap.registerPlugin(MotionPathPlugin)
+const FLAG_COLORS = ['#FCD116', '#003893', '#CE1126', '#AA151B', '#F1BF00', '#ffffff']
+const DESTINO_ROW = 1 // índice en ROWS: dispara el confeti cuando termina de formar MADRID
 
-const SVG_NS = 'http://www.w3.org/2000/svg'
-// viewBox con la proporción real de la slide (852×393 ≈ 100×46.1), igual
-// que en 03-collage.js: así preserveAspectRatio="none" no distorsiona.
-const ARC_PATH = 'M 7 36 Q 50 6 93 36'
-const FLIGHT_DURATION = 2.4
-const CONFETTI_COLORS = ['#FCD116', '#003893', '#CE1126', '#AA151B', '#F1BF00', '#ffffff']
+// Los flaps solo tienen letras/números/espacio: sin tildes.
+function stripAccents(s) {
+  return s
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toUpperCase()
+}
+
+// 'vie 30 oct 2026' → '30 OCT'
+function shortDate(dateStr) {
+  const [, day, month] = dateStr.split(' ')
+  return `${day} ${month.toUpperCase()}`
+}
+
+const ROW_LENGTH = 7
+const ROWS = [
+  { label: 'ORIGEN', value: stripAccents(outbound.from.city) },
+  { label: 'DESTINO', value: stripAccents(outbound.to.city), tone: 'rose' },
+  { label: 'VUELO', value: outbound.flight, tone: 'lilac' },
+  { label: 'FECHA', value: shortDate(outbound.date) },
+]
 
 export const slide18 = {
   id: '18-flight',
@@ -22,58 +41,56 @@ export const slide18 = {
     const el = document.createElement('div')
     el.className = 'slide-flight'
 
-    const svg = document.createElementNS(SVG_NS, 'svg')
-    svg.classList.add('flight-svg')
-    svg.setAttribute('viewBox', '0 0 100 46.1')
-    svg.setAttribute('preserveAspectRatio', 'none')
-    svg.innerHTML = `
-      <defs>
-        <mask id="flight-trail-mask">
-          <path d="${ARC_PATH}" class="flight-mask-path" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" />
-        </mask>
-      </defs>
-      <path d="${ARC_PATH}" class="flight-trail" fill="none" mask="url(#flight-trail-mask)" />
-      <g class="flight-plane">
-        <path transform="scale(0.24) rotate(90) translate(-12 -12)" d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" />
-      </g>
-    `
-    el.appendChild(svg)
+    const video = document.createElement('video')
+    video.className = 'flight-bg'
+    video.muted = true
+    video.loop = true
+    video.playsInline = true
+    video.preload = 'auto'
+    video.poster = `${import.meta.env.BASE_URL}video/ventanilla.jpg`
+    video.src = `${import.meta.env.BASE_URL}video/ventanilla.mp4`
+    el.appendChild(video)
 
-    const flagStart = document.createElement('span')
-    flagStart.className = 'flight-flag flight-flag-start'
-    flagStart.textContent = '🇨🇴'
-    el.appendChild(flagStart)
+    const caption = document.createElement('p')
+    caption.className = 'flight-caption'
+    caption.textContent = 'a 11.000 metros…'
+    el.appendChild(caption)
 
-    const flagEnd = document.createElement('span')
-    flagEnd.className = 'flight-flag flight-flag-end'
-    flagEnd.textContent = '🇪🇸'
-    el.appendChild(flagEnd)
+    const board = document.createElement('div')
+    board.className = 'flight-board'
+    const rows = ROWS.map(({ label, value, tone }, i) => {
+      const row = document.createElement('div')
+      row.className = 'flight-row'
+      const labelEl = document.createElement('span')
+      labelEl.className = 'flight-row-label'
+      labelEl.textContent = label
+      const flap = createSplitFlap(' '.repeat(ROW_LENGTH), { length: ROW_LENGTH, tone, row: i })
+      row.append(labelEl, flap.el)
+      board.appendChild(row)
+      return { flap, value }
+    })
+    el.appendChild(board)
 
-    const text = document.createElement('h1')
-    text.className = 'display display-md flight-teaser'
-    text.innerHTML = '¿Lista para <span class="accent">lo que viene</span>?'
-    el.appendChild(text)
+    const teaser = document.createElement('h1')
+    teaser.className = 'display display-md flight-teaser'
+    teaser.innerHTML = '¿Lista para <span class="accent">lo que viene</span>?'
+    el.appendChild(teaser)
 
-    el._flight = {
-      plane: svg.querySelector('.flight-plane'),
-      maskPath: svg.querySelector('.flight-mask-path'),
-      flagStart,
-      flagEnd,
-      text,
-    }
+    el._flight = { video, caption, board, rows, teaser }
     return el
   },
   // Ver la nota en text-slide.js: el estado oculto se aplica acá, antes de
   // que el contenedor sea visible.
   prepareEnter(el) {
-    const { plane, flagStart, flagEnd, text } = el._flight
+    const { video, caption, board, teaser } = el._flight
     gsap.set(el, { opacity: 0 })
-    gsap.set(plane, { opacity: 0 })
-    gsap.set([flagStart, flagEnd], { opacity: 0, scale: 0.5 })
-    gsap.set(text, { opacity: 0, y: 10, filter: 'blur(4px)' })
+    gsap.set(video, { opacity: 0, scale: 1, filter: 'blur(0px) brightness(1)' })
+    gsap.set(caption, { opacity: 0 })
+    gsap.set(board, { opacity: 0, scale: 1.15 })
+    gsap.set(teaser, { opacity: 0, y: 10, filter: 'blur(4px)' })
   },
   enter(el, ctx) {
-    const { plane, maskPath, flagStart, flagEnd, text } = el._flight
+    const { video, caption, board, rows, teaser } = el._flight
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const nextBtn = document.querySelector('.nav-next')
 
@@ -88,48 +105,49 @@ export const slide18 = {
       if (nextBtn) gsap.to(nextBtn, { opacity: 0.7, duration: 0.4 })
     }
 
+    function resolveBoard() {
+      rows.forEach(({ flap, value }, i) => {
+        const done = flap.flipTo(value, { reduced })
+        // Un solo disparo, cuando DESTINO termina de formar MADRID.
+        if (i === DESTINO_ROW && !reduced) {
+          done.then(() => {
+            confetti({ particleCount: 140, spread: 80, startVelocity: 45, colors: FLAG_COLORS, origin: { x: 0.5, y: 0.5 } })
+          })
+        }
+      })
+    }
+
     if (reduced) {
-      tl.to([flagStart, flagEnd], { opacity: 1, scale: 1, duration: 0.5, ease: 'power2.out' }, 0.3)
-      tl.to(text, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.6, ease: 'power2.out' }, 0.4)
-      tl.call(revealArrow, null, 1.4)
+      // Sin zoom ni ciclo de letras: ventanilla en póster estático (no se
+      // reproduce el video) y el tablero aparece ya resuelto con fade.
+      tl.to(caption, { opacity: 1, duration: 0.4 }, 0.1)
+      tl.to(board, { opacity: 1, scale: 1, duration: 0.5, ease: 'power2.out' }, 0.3)
+      tl.call(resolveBoard, null, 0.3)
+      tl.to(teaser, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.6, ease: 'power2.out' }, 1)
+      tl.call(revealArrow, null, 1.6)
       return
     }
 
-    const len = maskPath.getTotalLength()
-    gsap.set(maskPath, { strokeDasharray: len, strokeDashoffset: len })
+    // Si el autoplay falla (política del navegador), queda el póster: la
+    // secuencia sigue igual, solo sin movimiento en el fondo.
+    video.play().catch(() => {})
 
-    tl.to(flagStart, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(2)' }, 0.4)
-    tl.to(plane, { opacity: 1, duration: 0.3 }, 0.3)
-    tl.to(
-      plane,
-      {
-        motionPath: { path: ARC_PATH, autoRotate: true, alignOrigin: [0.5, 0.5] },
-        duration: FLIGHT_DURATION,
-        ease: 'power1.inOut',
-      },
-      0.3,
-    )
-    tl.to(maskPath, { strokeDashoffset: 0, duration: FLIGHT_DURATION, ease: 'power1.inOut' }, 0.3)
-    tl.to(flagEnd, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(2)' }, 0.3 + FLIGHT_DURATION - 0.35)
-    tl.call(
-      () => {
-        confetti({
-          particleCount: 140,
-          spread: 80,
-          startVelocity: 45,
-          colors: CONFETTI_COLORS,
-          origin: { x: 0.5, y: 0.55 },
-        })
-      },
-      null,
-      0.3 + FLIGHT_DURATION,
-    )
-    // El avión "aterriza": se achica y se desvanece junto a la bandera.
-    tl.to(plane, { opacity: 0, scale: 0.3, transformOrigin: '50% 50%', duration: 0.5, ease: 'power2.in' }, 0.3 + FLIGHT_DURATION - 0.1)
-    tl.to(text, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.6, ease: 'power2.out' }, 0.3 + FLIGHT_DURATION + 0.2)
-    tl.call(revealArrow, null, 0.3 + FLIGHT_DURATION + 0.9)
+    tl.to(video, { opacity: 1, duration: 1, ease: 'power2.out' }, 0)
+    tl.to(caption, { opacity: 1, duration: 0.4 }, 0.3)
+    // La cámara "entra": el video se acerca y se desenfoca. El hint se apaga
+    // en el camino, antes de que aparezca el tablero.
+    tl.to(video, { scale: 2.2, filter: 'blur(14px) brightness(.35)', duration: 1.3, ease: 'power3.in' }, 1.6)
+    tl.to(caption, { opacity: 0, duration: 0.4 }, 2.1)
+    tl.to(board, { opacity: 1, scale: 1, duration: 0.5, ease: 'power2.out' }, 2.9)
+    tl.call(resolveBoard, null, 2.9)
+    // El tablero ya se resolvió: el video se relaja y aparece la frase.
+    tl.to(video, { scale: 1.08, filter: 'blur(7px) brightness(.5)', duration: 1.4, ease: 'power2.out' }, 5)
+    tl.to(teaser, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.6, ease: 'power2.out' }, 5.3)
+    tl.call(revealArrow, null, 6.4)
   },
   leave(el) {
+    const { video } = el._flight
+    video.pause()
     const nextBtn = document.querySelector('.nav-next')
     if (nextBtn) gsap.set(nextBtn, { opacity: '' })
   },

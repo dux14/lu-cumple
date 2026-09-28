@@ -9,3 +9,6 @@ CLAUDE.md
 # Documentos privados (reserva de vuelo)
 *.pdf
 private/
+
+# Fotos originales del collage (con GPS y datos): solo se publican versiones procesadas
+lu cumple fotos/

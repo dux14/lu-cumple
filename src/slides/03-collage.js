@@ -1,34 +1,51 @@
-// Slide 3: collage de fotos. Polaroids dispersas en arco, unidas por
-// constelación dorada en orden cronológico. La primera late para invitar al
-// toque; cualquier polaroid abre un lightbox a pantalla completa (foto
-// izquierda, texto derecha) animado con Flip. Fotos y leyendas son
-// placeholders hasta que lleguen los datos reales.
+// Slide 3: collage. Rollo de cámara desechable en perspectiva 3D con las 22
+// fotos de la historia, en orden cronológico. Cada fotograma muestra la
+// vista previa reinterpretada con IA; tocar el fotograma del frente abre la
+// vista grande (el original bien encuadrado, con fecha y estilo). El rollo
+// avanza solo y se detiene en las dos fechas con flores (rosas el 16 sep,
+// amarillas el 21 sep, última foto). Ver
+// docs/superpowers/specs/2026-09-28-collage-rollo-flores-design.md y el
+// mockup docs/superpowers/mockups/collage-f1-integrado.html (lógica de
+// render/moment/travel portada aquí en vh en vez de px fijos).
 import { gsap } from 'gsap'
-import { Flip } from 'gsap/Flip'
+import { photos } from '../data/photos.js'
 
-gsap.registerPlugin(Flip)
-
-// Posiciones en % del área de la slide (852×393), en arco, lejos de la
-// barra de progreso (arriba) y de las flechas (esquinas inferiores).
-const LAYOUT = [
-  { x: 10, y: 58, rot: -6 },
-  { x: 23, y: 28, rot: 5 },
-  { x: 37, y: 62, rot: -4 },
-  { x: 50, y: 24, rot: 6 },
-  { x: 64, y: 60, rot: -5 },
-  { x: 78, y: 30, rot: 4 },
-  { x: 90, y: 56, rot: -6 },
+const MESES = [
+  'ENERO',
+  'FEBRERO',
+  'MARZO',
+  'ABRIL',
+  'MAYO',
+  'JUNIO',
+  'JULIO',
+  'AGOSTO',
+  'SEPTIEMBRE',
+  'OCTUBRE',
+  'NOVIEMBRE',
+  'DICIEMBRE',
 ]
 
-const photos = [
-  { src: null, date: '[fecha]', place: '[lugar]', caption: '[leyenda 1]', text: '[texto 1]' },
-  { src: null, date: '[fecha]', place: '[lugar]', caption: '[leyenda 2]', text: '[texto 2]' },
-  { src: null, date: '[fecha]', place: '[lugar]', caption: '[leyenda 3]', text: '[texto 3]' },
-  { src: null, date: '[fecha]', place: '[lugar]', caption: '[leyenda 4]', text: '[texto 4]' },
-  { src: null, date: '[fecha]', place: '[lugar]', caption: '[leyenda 5]', text: '[texto 5]' },
-  { src: null, date: '[fecha]', place: '[lugar]', caption: '[leyenda 6]', text: '[texto 6]' },
-  { src: null, date: '[fecha]', place: '[lugar]', caption: '[leyenda 7]', text: '[texto 7]' },
-]
+const STEP1 = 190 // px @ 393 de alto: paso horizontal al primer vecino
+const STEP_EXTRA = 120 // px por vecino adicional
+const ROSE_INDEX = photos.findIndex((p) => p.moment === 'rosas')
+const YELLOW_INDEX = photos.findIndex((p) => p.moment === 'amarillas') // última foto
+
+// Convierte un px pensado para una slide de 393px de alto a vh: los tamaños
+// del collage son relativos a la altura (852×393 y 852×320 se ven iguales).
+function vh(px) {
+  return (px / 393) * 100
+}
+
+function stamp(dateStr) {
+  const [, m, d] = dateStr.split('-').map(Number)
+  const yy = dateStr.slice(2, 4)
+  return `${m} ${d} '${yy}`
+}
+
+function monthLabel(dateStr) {
+  const [y, m] = dateStr.split('-').map(Number)
+  return `${MESES[m - 1]} ${y}`
+}
 
 export const slide03 = {
   id: '03-collage',
@@ -37,170 +54,425 @@ export const slide03 = {
     const el = document.createElement('div')
     el.classList.add('slide-collage')
 
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
-    svg.classList.add('collage-lines')
-    svg.setAttribute('viewBox', '0 0 100 46.1') // proporción 852×393
-    svg.setAttribute('preserveAspectRatio', 'none')
-    let d = ''
-    LAYOUT.forEach((p, i) => {
-      const px = p.x
-      const py = (p.y * 393) / 852 // reescala y a la misma unidad que x (viewBox custom)
-      d += i === 0 ? `M ${px} ${py}` : ` L ${px} ${py}`
+    const ambA = document.createElement('div')
+    ambA.className = 'collage-amb'
+    const ambB = document.createElement('div')
+    ambB.className = 'collage-amb'
+    el.append(ambA, ambB)
+
+    const tint = document.createElement('div')
+    tint.className = 'collage-tint'
+    el.appendChild(tint)
+
+    const reel = document.createElement('div')
+    reel.className = 'collage-reel'
+    reel.dataset.noNav = ''
+    const ribbon = document.createElement('div')
+    ribbon.className = 'collage-ribbon'
+    reel.appendChild(ribbon)
+
+    const frames = photos.map((p, i) => {
+      const f = document.createElement('div')
+      f.className = 'cf'
+      f.dataset.index = String(i)
+
+      const photo = document.createElement('div')
+      photo.className = 'cf-photo'
+      photo.style.backgroundImage = `url(${p.preview})`
+
+      const date = document.createElement('span')
+      date.className = 'cf-date'
+      date.textContent = stamp(p.date)
+
+      const styleLabel = document.createElement('span')
+      styleLabel.className = 'cf-style'
+      styleLabel.textContent = p.style
+
+      f.append(photo, date, styleLabel)
+
+      if (p.moment) {
+        const note = document.createElement('span')
+        note.className = 'cf-note'
+        note.innerHTML =
+          p.moment === 'rosas'
+            ? `16 sep · <span class="hand" style="color:var(--rose)">rosas rojas</span>`
+            : `21 sep · <span class="hand" style="color:#FFD34D">flores amarillas</span>`
+        f.appendChild(note)
+      }
+
+      reel.appendChild(f)
+      return f
     })
-    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
-    path.setAttribute('d', d)
-    path.setAttribute('class', 'collage-path')
-    svg.appendChild(path)
-    el.appendChild(svg)
 
-    const slots = LAYOUT.map((pos, i) => {
-      const slot = document.createElement('div')
-      slot.className = 'polaroid-slot'
-      slot.style.left = `${pos.x}%`
-      slot.style.top = `${pos.y}%`
+    el.appendChild(reel)
 
-      const photo = document.createElement('button')
-      photo.className = 'polaroid'
-      photo.style.transform = `rotate(${pos.rot}deg)`
-      photo.dataset.noNav = ''
-      photo.setAttribute('aria-label', `Ver foto ${i + 1}`)
-      if (i === 0) photo.classList.add('polaroid-pulse')
+    const hero = document.createElement('div')
+    hero.className = 'collage-hero'
+    el.appendChild(hero)
 
-      slot.appendChild(photo)
-      el.appendChild(slot)
-      return { slot, photo }
-    })
+    const videoRose1 = document.createElement('video')
+    videoRose1.className = 'collage-bloom side'
+    videoRose1.muted = true
+    videoRose1.playsInline = true
+    videoRose1.preload = 'auto'
+    videoRose1.src = `${import.meta.env.BASE_URL}video/rosas.mp4`
+
+    const videoRose2 = videoRose1.cloneNode()
+    videoRose2.classList.add('right')
+
+    const videoYellow = document.createElement('video')
+    videoYellow.className = 'collage-bloom'
+    videoYellow.muted = true
+    videoYellow.playsInline = true
+    videoYellow.preload = 'auto'
+    videoYellow.src = `${import.meta.env.BASE_URL}video/amarillas.mp4`
+
+    el.append(videoYellow, videoRose1, videoRose2)
+
+    const title = document.createElement('div')
+    title.className = 'collage-title'
+    title.innerHTML = `22 fotos, <span class="hand">22 años</span>`
+    el.appendChild(title)
+
+    const month = document.createElement('div')
+    month.className = 'collage-month'
+    month.textContent = monthLabel(photos[0].date)
+    el.appendChild(month)
+
+    const memo = document.createElement('div')
+    memo.className = 'collage-memo'
+    el.appendChild(memo)
 
     const lightbox = document.createElement('div')
-    lightbox.className = 'lightbox'
+    lightbox.className = 'collage-lightbox'
     lightbox.dataset.noNav = ''
-
-    const photoSlotFull = document.createElement('div')
-    photoSlotFull.className = 'lightbox-photo-slot'
-    lightbox.appendChild(photoSlotFull)
-
-    const textPane = document.createElement('div')
-    textPane.className = 'lightbox-text'
-    const eyebrow = document.createElement('p')
-    eyebrow.className = 'eyebrow'
-    const caption = document.createElement('h2')
-    caption.className = 'display lightbox-caption'
-    const body = document.createElement('p')
-    body.className = 'body'
-    textPane.append(eyebrow, caption, body)
-    lightbox.appendChild(textPane)
-
+    const lbPhoto = document.createElement('div')
+    lbPhoto.className = 'collage-lightbox-photo'
+    const lbText = document.createElement('div')
+    lbText.className = 'collage-lightbox-text'
+    const lbEyebrow = document.createElement('p')
+    lbEyebrow.className = 'eyebrow'
+    const lbStyle = document.createElement('p')
+    lbStyle.className = 'collage-lightbox-style'
+    const lbCaption = document.createElement('h2')
+    lbCaption.className = 'display'
+    const lbBody = document.createElement('p')
+    lbBody.className = 'body'
+    lbText.append(lbEyebrow, lbStyle, lbCaption, lbBody)
+    lightbox.append(lbPhoto, lbText)
     el.appendChild(lightbox)
 
-    el._collage = { svg, path, slots, lightbox, photoSlotFull, eyebrow, caption, body }
+    el._collage = {
+      ambA,
+      ambB,
+      reel,
+      frames,
+      hero,
+      videoYellow,
+      videoRose1,
+      videoRose2,
+      title,
+      month,
+      memo,
+      lightbox,
+      lbPhoto,
+      lbEyebrow,
+      lbStyle,
+      lbCaption,
+      lbBody,
+    }
     return el
   },
-  // Ver la nota en text-slide.js: el estado oculto se aplica acá, antes de
-  // que el contenedor sea visible, para que enter() no lo revele dos veces.
   prepareEnter(el) {
-    const { path, slots } = el._collage
     gsap.set(el, { opacity: 0 })
-    const len = path.getTotalLength()
-    path.style.strokeDasharray = String(len)
-    path.style.strokeDashoffset = String(len)
-    gsap.set(
-      slots.map((s) => s.photo),
-      { opacity: 0, scale: 0.85, y: 8 },
-    )
+    const { frames } = el._collage
+    gsap.set(frames, { xPercent: -50, yPercent: -50 })
   },
   enter(el, ctx) {
-    const { path, slots } = el._collage
     ctx.tl.to(el, { opacity: 1, duration: 0.4, ease: 'power2.out' })
-    ctx.tl.to(path, { strokeDashoffset: 0, duration: 1.4, ease: 'power2.inOut' }, 0.1)
-    ctx.tl.to(
-      slots.map((s) => s.photo),
-      { opacity: 1, scale: 1, y: 0, duration: 0.5, stagger: 0.08, ease: 'power2.out' },
-      0.2,
-    )
 
-    let opened = false
-    // Pointer que abrió el lightbox: al reparentar la polaroid dentro de
-    // `.lightbox` en el mismo pointerdown, el pointerup de ese gesto pasa a
-    // hacer bubbling a través de `.lightbox` y lo cerraría de inmediato.
-    let openingPointerId = null
-    let pulseTween = gsap.to(slots[0].photo, {
-      scale: 1.06,
-      boxShadow: '0 0 18px rgba(255, 92, 122, 0.6)',
-      duration: 1,
-      ease: 'sine.inOut',
-      yoyo: true,
-      repeat: -1,
-    })
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const c = el._collage
+    const { frames, reel, hero, videoYellow, videoRose1, videoRose2, ambA, ambB, title, month, memo, lightbox } = c
 
-    function stopPulse() {
-      if (!pulseTween) return
-      pulseTween.kill()
-      pulseTween = null
-      gsap.set(slots[0].photo, { boxShadow: 'none' })
+    if (reduced) {
+      setupReducedMotion(c)
+      setupLightbox(c, ctx)
+      el._collage.destroy = () => {
+        c.lightbox.classList.remove('is-open')
+        ctx.lockNav(false)
+      }
+      return
     }
 
-    function openLightbox(index, pointerId) {
-      stopPulse()
+    // pos: posición fraccionaria del rollo (0..21). render() dibuja cada
+    // fotograma según su distancia a esa posición.
+    const S = { pos: 0 }
+    let lastFrontIndex = -1
+    let ambFlip = false
+    let master = null
+    let opened = false
+
+    function render() {
+      frames.forEach((f, i) => {
+        const d = i - S.pos
+        const a = Math.abs(d)
+        if (a > 4) {
+          gsap.set(f, { display: 'none' })
+          return
+        }
+        const sign = Math.sign(d)
+        const x = sign * Math.min(a, 1) * STEP1 + sign * Math.max(0, a - 1) * STEP_EXTRA
+        const scale = 1.22 - Math.min(a, 1) * 0.34 - Math.max(0, a - 1) * 0.08
+        const ry = -Math.max(-1, Math.min(1, d)) * 34 - sign * Math.max(0, a - 1) * 6
+        gsap.set(f, {
+          display: '',
+          x: `${vh(x)}vh`,
+          y: 0,
+          scale,
+          rotationY: ry,
+          z: `${vh(-a * 60)}vh`,
+          opacity: 1 - Math.max(0, a - 1) * 0.35,
+          zIndex: 100 - Math.round(a * 10),
+          filter: `brightness(${1 - Math.min(a, 2) * 0.28})`,
+        })
+      })
+      const i = Math.round(S.pos)
+      if (i !== lastFrontIndex) {
+        lastFrontIndex = i
+        const p = photos[i]
+        ambFlip = !ambFlip
+        const on = ambFlip ? ambB : ambA
+        const off = ambFlip ? ambA : ambB
+        on.style.backgroundImage = `url(${p.preview})`
+        on.style.opacity = '1'
+        off.style.opacity = '0'
+        month.textContent = monthLabel(p.date)
+      }
+    }
+    render()
+
+    function petals(color, n) {
+      for (let i = 0; i < n; i++) {
+        const petal = document.createElement('div')
+        petal.className = 'collage-petal'
+        petal.style.background = color
+        el.appendChild(petal)
+        gsap.fromTo(
+          petal,
+          { x: Math.random() * el.clientWidth, y: -20, rotation: Math.random() * 360, opacity: 0.95 },
+          {
+            y: el.clientHeight + 40,
+            x: `+=${Math.random() * 160 - 80}`,
+            rotation: '+=420',
+            duration: 3.2 + Math.random() * 2,
+            delay: Math.random() * 1.4,
+            ease: 'none',
+            onComplete: () => petal.remove(),
+          },
+        )
+      }
+    }
+
+    function moment(i, { final = false } = {}) {
+      const p = photos[i]
+      const videos = p.moment === 'amarillas' ? [videoYellow] : [videoRose1, videoRose2]
+      const fr = frames[i]
+      const w = vh(184 * 1.22)
+      const h = vh(134 * 1.22)
+      const cx = 50 // centro horizontal del fotograma del frente
+      const cy = 54 // centro vertical: debe calzar con `.cf { top: 54% }` en collage.css
+      const tl = gsap.timeline()
+      // `playAll()` construye el timeline maestro llamando a moment(ROSE_INDEX)
+      // y moment(YELLOW_INDEX) uno detrás del otro, de forma síncrona: si el
+      // texto/la imagen se asignan aquí afuera (JS plano, no GSAP), la
+      // segunda llamada pisa los valores de la primera antes de reproducirse.
+      // Por eso quedan dentro de un `.add()`, diferidos a cuando el timeline
+      // realmente llegue a este punto.
+      tl.add(() => {
+        memo.innerHTML =
+          p.moment === 'amarillas'
+            ? `21 sep · <span class="hand" style="color:#FFD34D">flores amarillas</span>`
+            : `16 sep · <span class="hand" style="color:var(--rose)">rosas rojas</span>`
+        hero.style.backgroundImage = `url(${p.full})`
+      }, 0)
+        .set(hero, { left: `calc(${cx}% - ${w / 2}vh)`, top: `calc(${cy}% - ${h / 2}vh)`, width: `${w}vh`, height: `${h}vh`, opacity: 1, filter: 'brightness(1)' })
+        .set(fr, { opacity: 0 })
+        .to(frames.filter((f) => f !== fr), { opacity: 0, duration: 0.5 }, 0)
+        .to([title, month], { opacity: 0, duration: 0.4 }, 0)
+        .to(hero, { left: 0, top: 0, width: '100%', height: '100%', borderRadius: 0, duration: 1.1, ease: 'expo.inOut' }, 0.1)
+        .to(hero, { filter: 'brightness(.55) saturate(1.1)', duration: 0.9 }, '-=.2')
+        .add(() => videos.forEach((v) => { v.currentTime = 0; v.play() }), '<')
+        .fromTo(videos, { opacity: 0, y: 60 }, { opacity: 1, y: 0, duration: 1.2, ease: 'power2.out', overwrite: 'auto' }, '<')
+        .to(memo, { opacity: 1, duration: 0.7 }, '<.6')
+        .add(() => petals(p.moment === 'amarillas' ? '#FFD34D' : '#B3122E', 18), '<')
+      if (!final) {
+        tl.to([videos, memo], { opacity: 0, duration: 0.8 }, '+=3.2')
+          .to(hero, { left: `calc(${cx}% - ${w / 2}vh)`, top: `calc(${cy}% - ${h / 2}vh)`, width: `${w}vh`, height: `${h}vh`, borderRadius: 4, filter: 'brightness(1)', duration: 1, ease: 'expo.inOut' }, '<.2')
+          .add(() => {
+            render()
+            gsap.set(fr, { opacity: 1 })
+            gsap.set(hero, { opacity: 0 })
+          })
+          .to([title, month], { opacity: 1, duration: 0.4 })
+      }
+      return tl
+    }
+
+    function stopAll() {
+      if (master) master.kill()
+      gsap.killTweensOf(S)
+      ;[videoYellow, videoRose1, videoRose2].forEach((v) => {
+        v.pause()
+        gsap.set(v, { opacity: 0 })
+      })
+      gsap.set([hero, memo], { opacity: 0 })
+      gsap.set([title, month], { opacity: 1 })
+    }
+
+    function travel(to, dur) {
+      return gsap.to(S, { pos: to, duration: dur, ease: 'power1.inOut', onUpdate: render })
+    }
+
+    function playAll() {
+      stopAll()
+      S.pos = 0
+      render()
+      master = gsap
+        .timeline()
+        .add(travel(ROSE_INDEX, ROSE_INDEX * 0.55))
+        .add(moment(ROSE_INDEX), '+=.3')
+        .add(travel(YELLOW_INDEX, (YELLOW_INDEX - ROSE_INDEX) * 0.55), '+=.2')
+        .add(moment(YELLOW_INDEX, { final: true }), '+=.3')
+    }
+
+    // Arrastre: toma el control del rollo (pausa el avance automático). Si
+    // el movimiento fue mínimo, se trata como un toque: el fotograma del
+    // frente abre la vista grande, una vecina se trae al frente.
+    const TAP_THRESHOLD = 8
+    let dragging = false
+    let startX = 0
+    let lastX = 0
+    let moved = false
+
+    function onPointerDown(e) {
       if (opened) return
+      dragging = true
+      moved = false
+      startX = e.clientX
+      lastX = e.clientX
+      stopAll()
+    }
+
+    function onPointerMove(e) {
+      if (!dragging) return
+      const dx = e.clientX - lastX
+      if (Math.abs(e.clientX - startX) > TAP_THRESHOLD) moved = true
+      const stepPx = vh(STEP1) * (el.clientHeight / 100)
+      S.pos = Math.max(0, Math.min(photos.length - 1, S.pos - dx / stepPx))
+      lastX = e.clientX
+      render()
+    }
+
+    function onPointerUp(e) {
+      if (!dragging) return
+      dragging = false
+      if (!moved) {
+        const target = e.target.closest?.('.cf')
+        const index = target ? Number(target.dataset.index) : Math.round(S.pos)
+        if (index === Math.round(S.pos)) {
+          openLightbox(index)
+          return
+        }
+        gsap.to(S, { pos: index, duration: 0.5, ease: 'power2.out', onUpdate: render })
+        return
+      }
+      gsap.to(S, { pos: Math.round(S.pos), duration: 0.4, onUpdate: render })
+    }
+
+    function openLightbox(index) {
       opened = true
-      openingPointerId = pointerId
-      const { lightbox, photoSlotFull, eyebrow, caption, body } = el._collage
-      const photoEl = slots[index].photo
-      const data = photos[index]
-
-      const state = Flip.getState(photoEl)
-      // La rotación fija es un inline style: pisa el `transform: none` de
-      // `.polaroid-full` si no se limpia antes de mover la foto.
-      photoEl.dataset.rot = photoEl.style.transform
-      photoEl.style.transform = ''
-      photoEl.classList.add('polaroid-full')
-      photoSlotFull.appendChild(photoEl)
-      eyebrow.textContent = `${data.date} · ${data.place}`
-      caption.textContent = data.caption
-      body.textContent = data.text
-
+      const p = photos[index]
+      const { lbPhoto, lbEyebrow, lbStyle, lbCaption, lbBody } = c
+      lbPhoto.style.backgroundImage = `url(${p.full})`
+      lbEyebrow.textContent = `${p.n} / ${photos.length} · ${p.dateLabel.toUpperCase()}`
+      lbStyle.textContent = `versión ${p.style}`
+      lbCaption.textContent = p.caption || ''
+      lbCaption.style.display = p.caption ? '' : 'none'
+      lbBody.textContent = p.text || ''
+      lbBody.style.display = p.text ? '' : 'none'
       lightbox.classList.add('is-open')
-      gsap.set([eyebrow, caption, body], { opacity: 0, y: 8 })
-      Flip.from(state, { duration: 0.5, ease: 'power3.out', absolute: true })
-      gsap.to([eyebrow, caption, body], { opacity: 1, y: 0, duration: 0.4, stagger: 0.08, delay: 0.25, ease: 'power2.out' })
       ctx.lockNav(true)
     }
 
     function closeLightbox() {
       if (!opened) return
-      const openIndex = slots.findIndex((s) => s.photo.classList.contains('polaroid-full'))
-      if (openIndex === -1) return
-      const { lightbox, slots: allSlots } = el._collage
-      const photoEl = allSlots[openIndex].photo
-      const state = Flip.getState(photoEl)
-      photoEl.classList.remove('polaroid-full')
-      photoEl.style.transform = photoEl.dataset.rot || ''
-      allSlots[openIndex].slot.appendChild(photoEl)
-      Flip.from(state, {
-        duration: 0.4,
-        ease: 'power2.inOut',
-        absolute: true,
-        onComplete() {
-          lightbox.classList.remove('is-open')
-          opened = false
-        },
-      })
+      opened = false
+      lightbox.classList.remove('is-open')
       ctx.lockNav(false)
     }
 
-    slots.forEach((s, i) => {
-      s.photo.addEventListener('pointerdown', (e) => openLightbox(i, e.pointerId))
-    })
+    reel.addEventListener('pointerdown', onPointerDown)
+    window.addEventListener('pointermove', onPointerMove)
+    window.addEventListener('pointerup', onPointerUp)
+    lightbox.addEventListener('pointerup', closeLightbox)
 
-    // Dentro del lightbox, cualquier tap o un swipe hacia abajo cierra.
-    el._collage.lightbox.addEventListener('pointerup', (e) => {
-      if (e.pointerId === openingPointerId) {
-        openingPointerId = null
-        return
-      }
-      if (opened) closeLightbox()
-    })
+    playAll()
 
-    el._collage.stopPulse = stopPulse
+    el._collage.destroy = () => {
+      stopAll()
+      reel.removeEventListener('pointerdown', onPointerDown)
+      window.removeEventListener('pointermove', onPointerMove)
+      window.removeEventListener('pointerup', onPointerUp)
+      lightbox.removeEventListener('pointerup', closeLightbox)
+      closeLightbox()
+    }
   },
+  leave(el) {
+    el._collage?.destroy?.()
+  },
+}
+
+// Modo sin movimiento: rollo plano y desplazable (overflow-x en CSS), sin
+// avance automático ni 3D. Los momentos se ven como el fotograma con su
+// nota (`.cf-note`, mostrada solo en este modo vía CSS).
+function setupReducedMotion(c) {
+  const { ambA, month } = c
+  ambA.style.backgroundImage = `url(${photos[0].preview})`
+  ambA.style.opacity = '1'
+  month.textContent = monthLabel(photos[0].date)
+}
+
+function setupLightbox(c, ctx) {
+  const { reel, frames, lightbox, lbPhoto, lbEyebrow, lbStyle, lbCaption, lbBody, month } = c
+  let opened = false
+
+  function open(index) {
+    opened = true
+    const p = photos[index]
+    lbPhoto.style.backgroundImage = `url(${p.full})`
+    lbEyebrow.textContent = `${p.n} / ${photos.length} · ${p.dateLabel.toUpperCase()}`
+    lbStyle.textContent = `versión ${p.style}`
+    lbCaption.textContent = p.caption || ''
+    lbCaption.style.display = p.caption ? '' : 'none'
+    lbBody.textContent = p.text || ''
+    lbBody.style.display = p.text ? '' : 'none'
+    lightbox.classList.add('is-open')
+    ctx.lockNav(true)
+  }
+
+  function close() {
+    if (!opened) return
+    opened = false
+    lightbox.classList.remove('is-open')
+    ctx.lockNav(false)
+  }
+
+  frames.forEach((f, i) => f.addEventListener('pointerup', () => open(i)))
+  lightbox.addEventListener('pointerup', close)
+  reel.addEventListener('scroll', () => {
+    const i = Math.round(reel.scrollLeft / (frames[1]?.offsetLeft - frames[0]?.offsetLeft || 1))
+    const p = photos[Math.max(0, Math.min(photos.length - 1, i))]
+    if (p) month.textContent = monthLabel(p.date)
+  })
 }

@@ -17,5 +17,14 @@ export function countdownText(now) {
   if (now >= DEPARTURE) return 'Vas volando hacia mí'
   const days = bogotaDayNumber(DEPARTURE) - bogotaDayNumber(now)
   if (days <= 0) return 'Hoy vuelas hacia mí'
-  return days === 1 ? 'Falta 1 día para verte' : `Faltan ${days} días para verte`
+  return days === 1 ? 'Falta 1 día para vernos' : `Faltan ${days} días para vernos`
+}
+
+// Igual que countdownText, pero como número para el cierre en flaps: solo
+// tiene sentido mientras faltan días (≥ 1). En cualquier otro estado (hoy,
+// volando, juntos, ya vivido) no hay un número que mostrar.
+export function countdownDays(now) {
+  if (now >= DEPARTURE) return null
+  const days = bogotaDayNumber(DEPARTURE) - bogotaDayNumber(now)
+  return days > 0 ? days : null
 }
