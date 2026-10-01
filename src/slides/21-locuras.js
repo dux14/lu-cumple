@@ -1,19 +1,23 @@
-// Slide 21: "Toca hacer varias locuras…". Lista de pendientes tocable:
-// al marcar un ítem se tacha con trazo a mano y se enciende una estrella.
-// Estado en localStorage (con try/catch: puede no estar disponible).
+// Slide 21: "Toca hacer varias locuras…". Checklist de misión tocable
+// (opción 21-B del mockup aprobado, docs/superpowers/mockups/feedback-11-21.html):
+// dos columnas de 3 ítems, cada uno con una nota chistosa en Caveat.
+// Al tocar una casilla se dibuja un check animado. Estado en localStorage
+// (con try/catch: puede no estar disponible).
 import { gsap } from 'gsap'
 
 const TITLE_HTML = ['Toca hacer varias locuras', 'para que esto se pueda <span class="accent">dar</span>']
 
-// Placeholder: reemplaza por las locuras reales.
 const LOCURAS = [
-  'pedir permiso en el trabajo nuevo',
-  'pasaporte vigente',
-  'maleta para el frío de Madrid',
-  'sobrevivir 9 h 35 min de vuelo',
+  { text: 'escaparte 2 veces del trabajo (el 30 y el 10)', note: 'el jefe no se entera' },
+  { text: 'pedir remoto la semana del 2', note: 'nadie pregunta por qué el estado dice "en reunión"' },
+  { text: 'tener el pasaporte listo', note: 'con sello y todo' },
+  { text: 'muchas ganas de caminar', note: 'Madrid son 20 mil pasos al día' },
+  { text: 'querernos mucho', note: 'esto ya lo tenemos' },
+  { text: 'rezar mucho por el viaje', note: 'y una veladora extra' },
 ]
 
 const STORAGE_KEY = 'lu-cumple-locuras'
+const CHECK_PATH = 'M5 10.5l3.2 3.2L15 6.5'
 
 function readState() {
   try {
@@ -32,9 +36,11 @@ function writeState(done) {
   }
 }
 
-function toggleItem(item, done, index) {
+function toggleItem(label, path, done, index) {
   done[index] = !done[index]
-  item.classList.toggle('is-done', done[index])
+  const isDone = done[index]
+  label.classList.toggle('done', isDone)
+  gsap.to(path, { strokeDashoffset: isDone ? 0 : 20, duration: 0.35, ease: 'power2.out' })
   writeState(done)
 }
 
@@ -51,51 +57,62 @@ export const slide21 = {
     el.appendChild(title)
 
     const done = readState()
-    const list = document.createElement('ul')
-    list.className = 'locuras-list'
-    list.dataset.noNav = ''
+    const grid = document.createElement('div')
+    grid.className = 'locuras-grid'
+    grid.dataset.noNav = ''
 
-    LOCURAS.forEach((text, i) => {
-      const item = document.createElement('li')
-      item.className = 'locuras-item'
-      if (done[i]) item.classList.add('is-done')
+    LOCURAS.forEach(({ text, note }, i) => {
+      const row = document.createElement('div')
+      row.className = 'locuras-row'
 
-      const star = document.createElement('span')
-      star.className = 'locuras-star'
-      star.textContent = '✦'
-      item.appendChild(star)
+      const box = document.createElement('span')
+      box.className = 'locuras-box'
+      box.innerHTML = `<svg viewBox="0 0 20 20"><path d="${CHECK_PATH}" /></svg>`
+      row.appendChild(box)
+
+      const textWrap = document.createElement('span')
+      textWrap.className = 'locuras-text-wrap'
 
       const label = document.createElement('span')
       label.className = 'locuras-text'
       label.textContent = text
-      item.appendChild(label)
+      if (done[i]) label.classList.add('done')
+      textWrap.appendChild(label)
 
-      function onTap(e) {
+      const note_ = document.createElement('span')
+      note_.className = 'locuras-note'
+      note_.textContent = note
+      textWrap.appendChild(note_)
+
+      row.appendChild(textWrap)
+
+      const path = box.querySelector('path')
+      if (done[i]) gsap.set(path, { strokeDashoffset: 0 })
+
+      row.addEventListener('pointerup', (e) => {
         e.stopPropagation()
-        toggleItem(item, done, i)
-      }
-      item.addEventListener('pointerup', onTap)
+        toggleItem(label, path, done, i)
+      })
 
-      list.appendChild(item)
+      grid.appendChild(row)
     })
 
-    el.appendChild(list)
+    el.appendChild(grid)
     return el
   },
   prepareEnter(el) {
     gsap.set(el, { opacity: 0 })
-    gsap.set([el.querySelector('.display'), ...el.querySelectorAll('.locuras-item')], {
+    gsap.set([el.querySelector('.display'), ...el.querySelectorAll('.locuras-row')], {
       opacity: 0,
       y: 10,
-      filter: 'blur(4px)',
     })
   },
   enter(el, ctx) {
     ctx.tl.to(el, { opacity: 1, duration: 0.3, ease: 'power2.out' })
-    ctx.tl.to(el.querySelector('.display'), { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.5, ease: 'power2.out' })
+    ctx.tl.to(el.querySelector('.display'), { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' })
     ctx.tl.to(
-      el.querySelectorAll('.locuras-item'),
-      { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.4, stagger: 0.08, ease: 'power2.out' },
+      el.querySelectorAll('.locuras-row'),
+      { opacity: 1, y: 0, duration: 0.4, stagger: 0.08, ease: 'power2.out' },
       '-=0.2',
     )
   },

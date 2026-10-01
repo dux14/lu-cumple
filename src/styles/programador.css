@@ -126,3 +126,9 @@
   height: 100%;
   object-fit: cover;
 }
+
+/* La «o» final de «arreglando» (Caveat, rotada) sobresale de su caja y
+   choca con «de a pasos»: se le da aire explícito. */
+.slide-programador .display .wiggle {
+  margin-left: 0.25em;
+}

@@ -7,7 +7,7 @@ import './styles/trip.css'
 import './styles/oracion.css'
 import './styles/chiste.css'
 import './styles/programador.css'
-import './styles/rappis.css'
+import './styles/creditos.css'
 import './styles/te-quiero.css'
 import './styles/acabamos.css'
 import './styles/o-no.css'
@@ -22,6 +22,7 @@ import { createDeck } from './deck.js'
 import { initOrientation } from './orientation.js'
 import { initAudio } from './audio.js'
 import { slides } from './slides/index.js'
+import { schedulePreload } from './core/preload.js'
 
 const nebulaEl = document.getElementById('nebula')
 const skyCanvas = document.getElementById('sky')
@@ -33,3 +34,4 @@ const sky = createSky(skyCanvas)
 const audio = initAudio({ uiRoot })
 const deck = createDeck({ root: deckRoot, uiRoot, slides, sky, audio: audio.api, nebula })
 initOrientation({ deck, uiRoot })
+schedulePreload()

@@ -67,23 +67,23 @@ export function textSlide({ id, act, eyebrow, lines, note, paragraphs }) {
     // volverlo a animar.
     prepareEnter(el) {
       const targets = el.querySelectorAll('.eyebrow, .display, .note, [data-step="0"]')
-      gsap.set(targets, { opacity: 0, y: 10, filter: 'blur(4px)' })
+      gsap.set(targets, { opacity: 0, y: 10 })
     },
     enter(el, ctx) {
       const targets = el.querySelectorAll('.eyebrow, .display, .note, [data-step="0"]')
-      ctx.tl.to(targets, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.5, stagger: 0.12, ease: 'power2.out' })
+      ctx.tl.to(targets, { opacity: 1, y: 0, duration: 0.5, stagger: 0.12, ease: 'power2.out' })
     },
     showStep(el, i, ctx) {
       const curr = el.querySelector(`[data-step="${i}"]`)
       if (!curr) return
       const prev = el.querySelector(`[data-step="${i - 1}"]`)
       if (prev) {
-        ctx.tl.to(prev, { opacity: 0, y: -10, filter: 'blur(4px)', duration: 0.3, ease: 'power2.in' })
+        ctx.tl.to(prev, { opacity: 0, y: -10, duration: 0.3, ease: 'power2.in' })
       }
       ctx.tl.fromTo(
         curr,
-        { opacity: 0, y: 10, filter: 'blur(4px)' },
-        { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.4, ease: 'power2.out' },
+        { opacity: 0, y: 10 },
+        { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' },
         prev ? '-=0.1' : undefined,
       )
     },

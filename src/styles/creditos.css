@@ -1,0 +1,60 @@
+/* Slide 9 (créditos): barra de "créditos finales" que avanza a saltos y se
+   queda titilando cerca del 100%, sin llegar nunca. Ver
+   src/slides/09-creditos.js. Solo opacity/transform (scaleX), nada de
+   filter ni backdrop-filter. */
+
+.slide-creditos {
+  gap: clamp(20px, 5vh, 30px);
+}
+
+.creditos-bar {
+  width: min(420px, 78%);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.creditos-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: clamp(10px, 3.4cqh, 13px);
+}
+
+.creditos-label {
+  font-family: var(--f-text);
+  color: var(--lilac);
+  opacity: 0.75;
+  letter-spacing: 0.04em;
+  text-transform: lowercase;
+}
+
+.creditos-pct {
+  font-family: var(--f-text);
+  color: var(--lilac);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.creditos-track {
+  width: 100%;
+  height: 4px;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--plum) 40%, transparent);
+  overflow: hidden;
+}
+
+.creditos-fill {
+  width: 100%;
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--wine), var(--rose));
+  transform-origin: left center;
+  transform: scaleX(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .creditos-bar {
+    opacity: 1 !important;
+  }
+}

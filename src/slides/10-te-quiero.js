@@ -40,13 +40,13 @@ export const slide10 = {
   },
   prepareEnter(el) {
     gsap.set(el, { opacity: 0 })
-    gsap.set(el.querySelector('.tq-line'), { opacity: 0, y: 10, filter: 'blur(4px)' })
+    gsap.set(el.querySelector('.tq-line'), { opacity: 0, y: 10 })
   },
   enter(el, ctx) {
     const o = el._tq
     const line = el.querySelector('.tq-line')
     ctx.tl.to(el, { opacity: 1, duration: 0.3, ease: 'power2.out' })
-    ctx.tl.to(line, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.5, ease: 'power2.out' })
+    ctx.tl.to(line, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' })
 
     if (REDUCED) {
       o.os.textContent = 'o'.repeat(EXTRA_OS)

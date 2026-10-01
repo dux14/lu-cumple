@@ -68,12 +68,12 @@ function renderShortStep(el, i, ctx) {
   const o = el._oracion
   const html = shortHtml(i)
   if (ctx) {
-    ctx.tl.to(o.seg, { opacity: 0, y: -10, filter: 'blur(4px)', duration: 0.3, ease: 'power2.in' })
+    ctx.tl.to(o.seg, { opacity: 0, y: -10, duration: 0.3, ease: 'power2.in' })
     ctx.tl.call(() => {
       o.seg.innerHTML = html
       bindCta(el)
     })
-    ctx.tl.fromTo(o.seg, { opacity: 0, y: 10, filter: 'blur(4px)' }, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.4, ease: 'power2.out' })
+    ctx.tl.fromTo(o.seg, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' })
   } else {
     o.seg.innerHTML = html
     bindCta(el)
@@ -87,17 +87,16 @@ function renderReaderStep(el, i, animate) {
     gsap.to(o.readerSeg, {
       opacity: 0,
       y: -10,
-      filter: 'blur(4px)',
       duration: 0.3,
       ease: 'power2.in',
       onComplete() {
         fillReaderSeg(o.readerSeg, step)
-        gsap.fromTo(o.readerSeg, { opacity: 0, y: 10, filter: 'blur(4px)' }, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.4, ease: 'power2.out' })
+        gsap.fromTo(o.readerSeg, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' })
       },
     })
   } else {
     fillReaderSeg(o.readerSeg, step)
-    gsap.set(o.readerSeg, { opacity: 1, y: 0, filter: 'blur(0px)' })
+    gsap.set(o.readerSeg, { opacity: 1, y: 0 })
   }
   o.dots.querySelectorAll('i').forEach((d, k) => d.classList.toggle('is-on', k === i))
 }

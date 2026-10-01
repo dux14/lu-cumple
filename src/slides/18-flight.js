@@ -84,10 +84,10 @@ export const slide18 = {
   prepareEnter(el) {
     const { video, caption, board, teaser } = el._flight
     gsap.set(el, { opacity: 0 })
-    gsap.set(video, { opacity: 0, scale: 1, filter: 'blur(0px) brightness(1)' })
+    gsap.set(video, { opacity: 0, scale: 1, filter: 'brightness(1)' })
     gsap.set(caption, { opacity: 0 })
     gsap.set(board, { opacity: 0, scale: 1.15 })
-    gsap.set(teaser, { opacity: 0, y: 10, filter: 'blur(4px)' })
+    gsap.set(teaser, { opacity: 0, y: 10 })
   },
   enter(el, ctx) {
     const { video, caption, board, rows, teaser } = el._flight
@@ -123,7 +123,7 @@ export const slide18 = {
       tl.to(caption, { opacity: 1, duration: 0.4 }, 0.1)
       tl.to(board, { opacity: 1, scale: 1, duration: 0.5, ease: 'power2.out' }, 0.3)
       tl.call(resolveBoard, null, 0.3)
-      tl.to(teaser, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.6, ease: 'power2.out' }, 1)
+      tl.to(teaser, { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out' }, 1)
       tl.call(revealArrow, null, 1.6)
       return
     }
@@ -136,13 +136,20 @@ export const slide18 = {
     tl.to(caption, { opacity: 1, duration: 0.4 }, 0.3)
     // La cámara "entra": el video se acerca y se desenfoca. El hint se apaga
     // en el camino, antes de que aparezca el tablero.
+    // Este blur sí se mantiene animado (a diferencia del resto de blurs de
+    // entrada del encargo): es un solo elemento, no un loop de cientos de
+    // estrellas o un cuadro grande en reflow, y quitarlo aplana el efecto
+    // "la cámara se desenfoca al entrar" (confirmado con capturas antes/después:
+    // sin blur se ve un simple zoom seco). El costo real en iPhone de animar
+    // un filter:blur() sobre un único <video> es bajo comparado con los
+    // puntos 1 y 3 del encargo.
     tl.to(video, { scale: 2.2, filter: 'blur(14px) brightness(.35)', duration: 1.3, ease: 'power3.in' }, 1.6)
     tl.to(caption, { opacity: 0, duration: 0.4 }, 2.1)
     tl.to(board, { opacity: 1, scale: 1, duration: 0.5, ease: 'power2.out' }, 2.9)
     tl.call(resolveBoard, null, 2.9)
     // El tablero ya se resolvió: el video se relaja y aparece la frase.
     tl.to(video, { scale: 1.08, filter: 'blur(7px) brightness(.5)', duration: 1.4, ease: 'power2.out' }, 5)
-    tl.to(teaser, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.6, ease: 'power2.out' }, 5.3)
+    tl.to(teaser, { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out' }, 5.3)
     tl.call(revealArrow, null, 6.4)
   },
   leave(el) {

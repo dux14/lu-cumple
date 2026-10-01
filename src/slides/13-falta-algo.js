@@ -45,7 +45,7 @@ export const slide13 = {
   prepareEnter(el) {
     const o = el._falta
     gsap.set(el, { opacity: 0 })
-    gsap.set(el.querySelector('.display'), { opacity: 0, y: 10, filter: 'blur(4px)' })
+    gsap.set(el.querySelector('.display'), { opacity: 0, y: 10 })
     gsap.set(o.note, { opacity: 0 })
     if (!REDUCED) {
       const length = o.line.getTotalLength()
@@ -56,7 +56,7 @@ export const slide13 = {
   enter(el, ctx) {
     const o = el._falta
     ctx.tl.to(el, { opacity: 1, duration: 0.3, ease: 'power2.out' })
-    ctx.tl.to(el.querySelector('.display'), { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.5, ease: 'power2.out' })
+    ctx.tl.to(el.querySelector('.display'), { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' })
     if (REDUCED) {
       ctx.tl.to(o.note, { opacity: 0.85, duration: 0.3 })
       return

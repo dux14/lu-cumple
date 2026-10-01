@@ -161,14 +161,33 @@
   z-index: 8;
 }
 
-/* Momento de flores: la foto activa se expande a pantalla completa. */
+/* Momento de flores: la foto activa se expande a pantalla completa.
+   Antes el JS animaba left/top/width/height (reflow en cada frame); ahora
+   el cuadro queda fijo a pantalla completa y 03-collage.js solo lo escala
+   y traslada con transform (scale/xPercent/yPercent), con overflow hidden
+   para recortarlo al tamaño chico y respetar el border-radius. */
 .collage-hero {
   position: absolute;
+  inset: 0;
+  overflow: hidden;
   background-size: cover;
   background-position: center;
   z-index: 5;
   opacity: 0;
   border-radius: 4px;
+  will-change: transform;
+}
+
+/* Oscurecido del hero durante el acercamiento: reemplaza el tween de
+   `filter: brightness/saturate` (costoso sobre un elemento grande) por un
+   overlay sólido con opacity animada, hijo de .collage-hero para heredar
+   su transform y su recorte. */
+.collage-hero-dim {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background: rgba(8, 4, 10, 0.45);
+  pointer-events: none;
 }
 
 .collage-bloom {

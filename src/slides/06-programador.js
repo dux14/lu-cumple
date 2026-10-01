@@ -13,7 +13,7 @@ const TITLE_HTML = [
 // Placeholder: las líneas de abajo son borrador. El usuario las reemplaza
 // por sus «fix:» reales (máx. ~55 caracteres cada una para que quepan).
 const FIX_LINES = [
-  { ok: true, text: 'fix: responder mensajes en menos de 3 h' },
+  { ok: true, text: 'fix: dormir cuando estemos juntos' },
   { ok: true, text: 'fix: dejar de decir «ya casi» cuando no es ya casi' },
   { ok: false, text: "sigue haciendo chistes malos (won't fix)" },
 ]

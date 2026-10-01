@@ -19,7 +19,7 @@ function bindHold(el) {
     if (held) return
     held = true
     o.wrap.classList.add('is-held')
-    gsap.to(o.joke, { filter: 'blur(0px)', duration: 0.35, ease: 'power2.out' })
+    gsap.to(o.joke, { opacity: 1, scale: 1, duration: 0.35, ease: 'power2.out' })
     gsap.to(o.veil, { opacity: 0, duration: 0.3, ease: 'power2.out' })
     gsap.to(o.blush, { opacity: 0.6, duration: 1, ease: 'power2.out' })
   }
@@ -28,7 +28,7 @@ function bindHold(el) {
     if (!held) return
     held = false
     o.wrap.classList.remove('is-held')
-    gsap.to(o.joke, { filter: 'blur(14px)', duration: 0.3, ease: 'power2.in' })
+    gsap.to(o.joke, { opacity: 0, scale: 0.96, duration: 0.3, ease: 'power2.in' })
     gsap.to(o.veil, { opacity: 1, duration: 0.3, ease: 'power2.in' })
     gsap.to(o.blush, { opacity: 0, duration: 0.5, ease: 'power2.in' })
   }
@@ -89,7 +89,7 @@ export const slide05 = {
   },
   prepareEnter(el) {
     gsap.set(el, { opacity: 0 })
-    gsap.set(el._chiste.joke, { filter: 'blur(14px)' })
+    gsap.set(el._chiste.joke, { opacity: 0, scale: 0.96 })
   },
   enter(el, ctx) {
     ctx.tl.to(el, { opacity: 1, duration: 0.4, ease: 'power2.out' })

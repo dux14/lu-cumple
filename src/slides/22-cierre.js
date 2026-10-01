@@ -201,13 +201,13 @@ export const slide22 = {
     return el
   },
   prepareEnter(el) {
-    gsap.set(el.querySelector('.cierre-title'), { opacity: 0, y: 10, filter: 'blur(4px)' })
+    gsap.set(el.querySelector('.cierre-title'), { opacity: 0, y: 10 })
     gsap.set(el.querySelector('.cierre-replay'), { opacity: 0 })
   },
   enter(el, ctx) {
     const title = el.querySelector('.cierre-title')
     const replayBtn = el.querySelector('.cierre-replay')
-    ctx.tl.to(title, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.5, ease: 'power2.out' })
+    ctx.tl.to(title, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' })
     ctx.tl.call(() => {
       playConstellation(el, {
         onDone() {

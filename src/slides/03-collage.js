@@ -108,6 +108,13 @@ export const slide03 = {
 
     const hero = document.createElement('div')
     hero.className = 'collage-hero'
+    // Oscurece el hero durante el acercamiento a flores: antes era un tween
+    // continuo de `filter: brightness/saturate` sobre el hero (repintaba el
+    // blur/filtro del elemento en cada frame); ahora es un overlay propio
+    // con opacity animada, hijo de hero para heredar su transform/recorte.
+    const heroDim = document.createElement('div')
+    heroDim.className = 'collage-hero-dim'
+    hero.appendChild(heroDim)
     el.appendChild(hero)
 
     const videoRose1 = document.createElement('video')
@@ -168,6 +175,7 @@ export const slide03 = {
       reel,
       frames,
       hero,
+      heroDim,
       videoYellow,
       videoRose1,
       videoRose2,
@@ -193,7 +201,7 @@ export const slide03 = {
 
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const c = el._collage
-    const { frames, reel, hero, videoYellow, videoRose1, videoRose2, ambA, ambB, title, month, memo, lightbox } = c
+    const { frames, reel, hero, heroDim, videoYellow, videoRose1, videoRose2, ambA, ambB, title, month, memo, lightbox } = c
 
     if (reduced) {
       setupReducedMotion(c)
@@ -282,6 +290,15 @@ export const slide03 = {
       const h = vh(134 * 1.22)
       const cx = 50 // centro horizontal del fotograma del frente
       const cy = 54 // centro vertical: debe calzar con `.cf { top: 54% }` en collage.css
+      // El hero ya no mueve left/top/width/height (reflow): queda fijo a
+      // pantalla completa por CSS y en vez de eso se escala/traslada con
+      // transform. scaleY es directo (h ya es % de la altura); scaleX
+      // compensa que w está en vh pero el ancho real del contenedor no
+      // tiene por qué coincidir con su alto. yPercent centra el hero
+      // chico en `cy` (xPercent queda en 0 porque cx siempre es 50).
+      const scaleX = ((w / 100) * el.clientHeight) / el.clientWidth
+      const scaleY = h / 100
+      const dy = cy - 50
       const tl = gsap.timeline()
       // `playAll()` construye el timeline maestro llamando a moment(ROSE_INDEX)
       // y moment(YELLOW_INDEX) uno detrás del otro, de forma síncrona: si el
@@ -296,19 +313,34 @@ export const slide03 = {
             : `16 sep · <span class="hand" style="color:var(--rose)">rosas rojas</span>`
         hero.style.backgroundImage = `url(${p.full})`
       }, 0)
-        .set(hero, { left: `calc(${cx}% - ${w / 2}vh)`, top: `calc(${cy}% - ${h / 2}vh)`, width: `${w}vh`, height: `${h}vh`, opacity: 1, filter: 'brightness(1)' })
+        .set(hero, { xPercent: 0, yPercent: dy, scaleX, scaleY, opacity: 1 })
+        .set(heroDim, { opacity: 0 })
         .set(fr, { opacity: 0 })
         .to(frames.filter((f) => f !== fr), { opacity: 0, duration: 0.5 }, 0)
         .to([title, month], { opacity: 0, duration: 0.4 }, 0)
-        .to(hero, { left: 0, top: 0, width: '100%', height: '100%', borderRadius: 0, duration: 1.1, ease: 'expo.inOut' }, 0.1)
-        .to(hero, { filter: 'brightness(.55) saturate(1.1)', duration: 0.9 }, '-=.2')
-        .add(() => videos.forEach((v) => { v.currentTime = 0; v.play() }), '<')
+        .to(hero, { xPercent: 0, yPercent: 0, scaleX: 1, scaleY: 1, borderRadius: 0, duration: 1.1, ease: 'expo.inOut' }, 0.1)
+        .to(heroDim, { opacity: 1, duration: 0.9 }, '-=.2')
+        .add(() => {
+          // Dos videos (rosas) no arrancan en el mismo frame que el resto
+          // de la transición: se escalona el segundo un frame después para
+          // no apilar dos decodes de video justo cuando el hero termina de
+          // escalar.
+          videos[0].currentTime = 0
+          videos[0].play()
+          if (videos[1]) {
+            requestAnimationFrame(() => {
+              videos[1].currentTime = 0
+              videos[1].play()
+            })
+          }
+        }, '<')
         .fromTo(videos, { opacity: 0, y: 60 }, { opacity: 1, y: 0, duration: 1.2, ease: 'power2.out', overwrite: 'auto' }, '<')
         .to(memo, { opacity: 1, duration: 0.7 }, '<.6')
         .add(() => petals(p.moment === 'amarillas' ? '#FFD34D' : '#B3122E', 18), '<')
       if (!final) {
         tl.to([videos, memo], { opacity: 0, duration: 0.8 }, '+=3.2')
-          .to(hero, { left: `calc(${cx}% - ${w / 2}vh)`, top: `calc(${cy}% - ${h / 2}vh)`, width: `${w}vh`, height: `${h}vh`, borderRadius: 4, filter: 'brightness(1)', duration: 1, ease: 'expo.inOut' }, '<.2')
+          .to(hero, { xPercent: 0, yPercent: dy, scaleX, scaleY, borderRadius: 4, duration: 1, ease: 'expo.inOut' }, '<.2')
+          .to(heroDim, { opacity: 0, duration: 1 }, '<')
           .add(() => {
             render()
             gsap.set(fr, { opacity: 1 })
@@ -326,7 +358,7 @@ export const slide03 = {
         v.pause()
         gsap.set(v, { opacity: 0 })
       })
-      gsap.set([hero, memo], { opacity: 0 })
+      gsap.set([hero, memo, heroDim], { opacity: 0 })
       gsap.set([title, month], { opacity: 1 })
     }
 

@@ -1,70 +1,95 @@
-/* Slide 21 (locuras): lista de pendientes tocable, con tachado a mano y
-   estrella que se enciende. Ver src/slides/21-locuras.js. */
+/* Slide 21 (locuras): checklist de misión tocable, dos columnas de 3
+   ítems con nota chistosa en Caveat. Opción 21-B del mockup aprobado
+   (docs/superpowers/mockups/feedback-11-21.html). Tamaños en clamp con
+   vh, convertidos desde los px del mockup (base altura 393px), para
+   verse igual en 852×393 y 852×320. Ver src/slides/21-locuras.js. */
 
-.locuras-list {
-  list-style: none;
-  margin: clamp(14px, 3.4vh, 22px) 0 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: clamp(8px, 2vh, 14px);
-  max-width: 68ch;
-  width: 100%;
+.slide-locuras {
+  padding-left: max(20px, env(safe-area-inset-left));
+  padding-right: max(20px, env(safe-area-inset-right));
 }
 
-.locuras-item {
+/* El título grande (display-md) deja muy poco alto para la grilla de 6
+   ítems: se achica solo en esta slide, fiel al tamaño del mockup. */
+.slide-locuras .display.display-md {
+  font-size: clamp(18px, 7.4vh, 30px);
+  max-width: 100%;
+  margin-bottom: clamp(12px, 4.5vh, 22px);
+}
+
+.locuras-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(6px, 2.6vh, 14px) clamp(20px, 4vw, 40px);
+  width: 100%;
+  max-width: 800px;
+}
+
+.locuras-row {
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 10px;
-  font-family: var(--f-text);
-  font-size: clamp(14px, 4vh, 18px);
+  padding: 3px 2px;
+  text-align: left;
   cursor: pointer;
   touch-action: manipulation;
 }
 
-.locuras-star {
-  color: var(--lilac);
-  opacity: 0.3;
-  font-size: 0.9em;
-  transition: opacity 0.3s ease, color 0.3s ease;
+.locuras-box {
+  position: relative;
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  border: 1.5px solid var(--lilac);
+  border-radius: 4px;
 }
 
-.locuras-item.is-done .locuras-star {
-  color: var(--rose);
-  opacity: 1;
+.locuras-box svg {
+  position: absolute;
+  inset: -2px;
+  width: 24px;
+  height: 24px;
+}
+
+.locuras-box path {
+  fill: none;
+  stroke: var(--rose);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 20;
+  stroke-dashoffset: 20;
+}
+
+.locuras-text-wrap {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .locuras-text {
-  position: relative;
-  opacity: 0.9;
+  font-family: var(--f-text);
+  font-size: clamp(12px, 4.3vh, 17px);
+  line-height: 1.15;
+  color: #e9e3f5;
 }
 
-.locuras-item.is-done .locuras-text {
+.locuras-text.done {
+  text-decoration: line-through;
   opacity: 0.55;
 }
 
-/* Trazo a mano que tacha el ítem: una línea ligeramente inclinada que
-   crece de izquierda a derecha al marcar. */
-.locuras-text::after {
-  content: '';
-  position: absolute;
-  left: -2%;
-  right: 102%;
-  top: 52%;
-  height: 2px;
-  background: var(--rose);
-  border-radius: 2px;
+.locuras-note {
+  font-family: var(--f-hand);
+  font-weight: 600;
+  color: var(--lilac);
+  font-size: clamp(12px, 4.3vh, 17px);
   transform: rotate(-1.5deg);
-  transition: right 0.35s ease;
-}
-
-.locuras-item.is-done .locuras-text::after {
-  right: -2%;
+  opacity: 0.85;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .locuras-text::after {
+  .locuras-box path {
     transition: none;
   }
 }

@@ -51,8 +51,8 @@ export const slide20 = {
     // (misma slide, ~2s de fundido), esa animación sigue viva y le disputa
     // la opacidad/escala al `gsap.set` de abajo. Se mata antes de fijarlo.
     gsap.killTweensOf(bg)
-    gsap.set(bg, { opacity: 1, scale: 1, filter: 'blur(0px) brightness(0.5)' })
-    gsap.set(title, { opacity: 0, y: 10, filter: 'blur(4px)' })
+    gsap.set(bg, { opacity: 1, scale: 1, filter: 'brightness(0.5)' })
+    gsap.set(title, { opacity: 0, y: 10 })
     gsap.set(note, { opacity: 0, y: 8 })
   },
   enter(el, ctx) {
@@ -61,7 +61,7 @@ export const slide20 = {
 
     const tl = ctx.tl
     tl.to(el, { opacity: 1, duration: 0.3, ease: 'power2.out' }, 0)
-    tl.to(title, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.5, ease: 'power2.out' }, 0.1)
+    tl.to(title, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' }, 0.1)
     tl.to(note, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' }, 0.6 + NOTE_DELAY)
 
     if (reduced()) {
@@ -71,7 +71,7 @@ export const slide20 = {
     }
     tl.to(
       bg,
-      { opacity: 0, scale: 1.08, filter: 'blur(12px) brightness(0.3)', duration: FADE_DURATION, ease: 'power2.in' },
+      { opacity: 0, scale: 1.08, filter: 'brightness(0.3)', duration: FADE_DURATION, ease: 'power2.in' },
       FADE_DELAY,
     )
     tl.call(() => bg.pause(), null, FADE_DELAY + FADE_DURATION)

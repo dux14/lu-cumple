@@ -119,6 +119,21 @@ export function createSky(canvas) {
       params.warmth <= 0.5 ? [WHITE, LILAC, params.warmth * 2] : [LILAC, ROSE, (params.warmth - 0.5) * 2]
     const mix = [from[0] + (to[0] - from[0]) * t, from[1] + (to[1] - from[1]) * t, from[2] + (to[2] - from[2]) * t]
 
+    // El gradiente del trazo es el mismo (color y largo) para todas las
+    // estrellas visibles de esta capa en este frame: se crea una sola vez
+    // (antes: un createLinearGradient por estrella por frame, con hasta
+    // ~300 estrellas por capa durante el suspenso) y se traslada con el
+    // contexto en vez de instanciarlo de nuevo en cada iteración.
+    const trailGradient =
+      trailPx > 1.5
+        ? (() => {
+            const grad = ctx.createLinearGradient(0, 0, trailPx, 0)
+            grad.addColorStop(0, `rgba(${mix[0]}, ${mix[1]}, ${mix[2]}, 1)`)
+            grad.addColorStop(1, `rgba(${mix[0]}, ${mix[1]}, ${mix[2]}, 0)`)
+            return grad
+          })()
+        : null
+
     for (const star of stars) {
       // Drift hacia la izquierda, con wrap continuo.
       star.x -= driftPx
@@ -135,21 +150,38 @@ export function createSky(canvas) {
 
       const px = star.x * width
       const py = star.y * height
-      if (trailPx > 1.5) {
-        const grad = ctx.createLinearGradient(px, py, px + trailPx, py)
-        grad.addColorStop(0, `rgba(${mix[0]}, ${mix[1]}, ${mix[2]}, ${alpha})`)
-        grad.addColorStop(1, `rgba(${mix[0]}, ${mix[1]}, ${mix[2]}, 0)`)
-        ctx.strokeStyle = grad
+      if (trailGradient) {
+        ctx.save()
+        ctx.translate(px, py)
+        ctx.globalAlpha = alpha
+        ctx.strokeStyle = trailGradient
         ctx.lineWidth = size
         ctx.beginPath()
-        ctx.moveTo(px, py)
-        ctx.lineTo(px + trailPx, py)
+        ctx.moveTo(0, 0)
+        ctx.lineTo(trailPx, 0)
         ctx.stroke()
+        ctx.restore()
       } else {
         ctx.fillStyle = `rgba(${mix[0]}, ${mix[1]}, ${mix[2]}, ${alpha})`
         ctx.fillRect(px, py, size, size)
       }
     }
+  }
+
+  // Gradientes del halo de las dos estrellas especiales: el color (rosa o
+  // lila) no cambia, así que se cachean una sola vez en vez de crear uno
+  // nuevo por lado por frame; el pulso de alpha se aplica con
+  // ctx.globalAlpha en vez de reconstruir los color-stops.
+  const pairGlowGradients = {}
+  function getPairGlow(col) {
+    const key = col === ROSE ? 'rose' : 'lilac'
+    if (!pairGlowGradients[key]) {
+      const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, 16)
+      grad.addColorStop(0, `rgba(${col[0]}, ${col[1]}, ${col[2]}, 0.55)`)
+      grad.addColorStop(1, `rgba(${col[0]}, ${col[1]}, ${col[2]}, 0)`)
+      pairGlowGradients[key] = grad
+    }
+    return pairGlowGradients[key]
   }
 
   // Dos estrellas especiales (rosa a la izquierda, lila a la derecha) que se
@@ -163,13 +195,14 @@ export function createSky(canvas) {
       const x = width * (0.5 + (side * params.pairGap) / 2)
       const a = Math.max(0, Math.min(1, params.pairAlpha * pulse))
       const col = side < 0 ? ROSE : LILAC
-      const glow = ctx.createRadialGradient(x, y, 0, x, y, 16)
-      glow.addColorStop(0, `rgba(${col[0]}, ${col[1]}, ${col[2]}, ${0.55 * a})`)
-      glow.addColorStop(1, `rgba(${col[0]}, ${col[1]}, ${col[2]}, 0)`)
-      ctx.fillStyle = glow
+      ctx.save()
+      ctx.translate(x, y)
+      ctx.globalAlpha = a
+      ctx.fillStyle = getPairGlow(col)
       ctx.beginPath()
-      ctx.arc(x, y, 16, 0, Math.PI * 2)
+      ctx.arc(0, 0, 16, 0, Math.PI * 2)
       ctx.fill()
+      ctx.restore()
       ctx.fillStyle = `rgba(255, 255, 255, ${a})`
       ctx.beginPath()
       ctx.arc(x, y, 2.2, 0, Math.PI * 2)
