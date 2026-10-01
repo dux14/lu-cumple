@@ -41,10 +41,9 @@ const SWIPE_THRESHOLD = 40
 
 // Referencia a la slide montada: onNav la necesita y deck.js llama a
 // onNav como método suelto (no hay `this` de instancia útil acá). `activeAudio`
-// se guarda igual, desde ctx.audio, para poder duckear al abrir/cerrar el lector.
+// se guarda igual, desde ctx.audio, para silenciar la canción con el lector abierto.
 let activeEl = null
 let activeAudio = null
-const READER_DUCK_LEVEL = 0.35
 
 function shortHtml(i) {
   return SHORT[i] + (i === SHORT.length - 1 ? CTA_HTML : '')
@@ -110,7 +109,9 @@ function openReader(el) {
   o.glow.classList.add('is-on')
   renderReaderStep(el, 0, false)
   gsap.fromTo(o.reader, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: 'power2.out' })
-  activeAudio?.duck(READER_DUCK_LEVEL, 0.6)
+  // Modo lectura para la hora santa: sin música.
+  activeAudio?.hold(0.6)
+  document.documentElement.classList.add('is-reading')
 }
 
 function closeReader(el) {
@@ -126,7 +127,8 @@ function closeReader(el) {
       o.glow.classList.remove('is-on')
     },
   })
-  activeAudio?.restore(0.6)
+  activeAudio?.release(0.8)
+  document.documentElement.classList.remove('is-reading')
 }
 
 function readerNext(el) {
@@ -257,8 +259,9 @@ export const slide07 = {
     o.short.style.display = ''
     o.glow.classList.remove('is-on')
     // Salvaguarda: si se sale de la slide con el lector todavía abierto
-    // (p. ej. navegación directa por índice), restaura el volumen igual.
-    if (wasReading) (ctx.audio ?? activeAudio)?.restore(0.4)
+    // (p. ej. navegación directa por índice), reanuda la música igual.
+    if (wasReading) (ctx.audio ?? activeAudio)?.release(0.4)
+    document.documentElement.classList.remove('is-reading')
     activeAudio = null
   },
 }

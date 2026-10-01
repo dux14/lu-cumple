@@ -186,3 +186,9 @@
 .oracion-glow.is-on {
   opacity: 1;
 }
+
+/* Con el lector abierto no hay música (ver hold() en src/audio.js) y el
+   botón de mute queda justo encima del ×: se oculta mientras se lee. */
+.is-reading .mute {
+  display: none;
+}

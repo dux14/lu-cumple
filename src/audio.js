@@ -57,6 +57,10 @@ export function initAudio({ uiRoot }) {
   let tapeStopped = false
   let cueDucked = false
   let duckLevel = 1 // 1 = sin duck
+  // Silencio total (lector de la oración, slide 7): la canción queda en
+  // pausa y ningún play() la reanuda hasta release().
+  let held = false
+  let holdTimer = null
   let currentSlideId = null
   let crossfadeTimer = null
 
@@ -147,10 +151,13 @@ export function initAudio({ uiRoot }) {
   function unlock() {
     if (unlocked) return
     ensureWebAudio()
-    applyVolume(UNLOCK_DURATION)
+    if (!held) applyVolume(UNLOCK_DURATION)
     audio
       .play()
       .then(() => {
+        // Con hold activo el gesto igual desbloquea (play dentro del gesto),
+        // pero la canción no debe sonar: se pausa de inmediato.
+        if (held) audio.pause()
         // Confirma el desbloqueo real antes de dejar de escuchar: un
         // `play()` resuelto con el contexto todavía 'suspended' (o
         // 'interrupted') no es un desbloqueo válido en iOS.
@@ -186,7 +193,7 @@ export function initAudio({ uiRoot }) {
   // en loop desde el verso 2 con fundido; en el cierre se deja el fade
   // final suave que ya trae el archivo exportado (sin volver a arrancar).
   function onEnded() {
-    if (currentSlideId === '22-cierre') return
+    if (currentSlideId === '22-cierre' || held) return
     audio.currentTime = VERSE_2_START
     setGain(0, 0)
     audio.play().catch(() => {})
@@ -210,7 +217,7 @@ export function initAudio({ uiRoot }) {
   function onVisibility() {
     if (document.hidden) {
       audio.pause()
-    } else if (unlocked && !muted) {
+    } else if (unlocked && !muted && !held && !tapeStopped) {
       audio.play().catch(() => {})
     }
   }
@@ -233,7 +240,8 @@ export function initAudio({ uiRoot }) {
     tapeStop(seconds = TAPE_STOP_DEFAULT_SECONDS) {
       tapeStopped = true
       gsap.to(audio, {
-        playbackRate: 0.05,
+        // 0.0625 es el mínimo que acepta Chromium; más bajo lanza error.
+        playbackRate: 0.07,
         duration: seconds,
         ease: 'power2.in',
         overwrite: true,
@@ -247,7 +255,7 @@ export function initAudio({ uiRoot }) {
       tapeStopped = false
       if (typeof atSeconds === 'number') audio.currentTime = atSeconds
       audio.playbackRate = 1
-      audio.play().catch(() => {})
+      if (!held) audio.play().catch(() => {})
       applyVolume(seconds)
     },
     // Aplica el cue musical del slide `slideId` (ver src/data/song-cues.js).
@@ -256,6 +264,29 @@ export function initAudio({ uiRoot }) {
     // ('forward'/'backward') a 'next'/'prev' antes de pasarlo. El mute
     // siempre tiene prioridad (currentVolume ya lo resuelve en cada
     // setGain/applyVolume).
+    // Silencio total con pausa real (no solo volumen en 0): lo usa el lector
+    // de la oración. release() reanuda donde iba, con fundido, salvo que la
+    // canción esté detenida por el tapeStop de la 11.
+    hold(seconds = 0.5) {
+      if (held) return
+      held = true
+      setGain(0, seconds)
+      if (holdTimer) clearTimeout(holdTimer)
+      holdTimer = window.setTimeout(() => {
+        holdTimer = null
+        if (held) audio.pause()
+      }, seconds * 1000)
+    },
+    release(seconds = 0.8) {
+      if (!held) return
+      held = false
+      if (holdTimer) clearTimeout(holdTimer)
+      holdTimer = null
+      if (!unlocked || tapeStopped) return
+      setGain(0, 0)
+      audio.play().catch(() => {})
+      applyVolume(seconds)
+    },
     isMuted() {
       return muted
     },
