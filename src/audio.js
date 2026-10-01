@@ -70,9 +70,15 @@ export function initAudio({ uiRoot }) {
   }
 
   // Crea el grafo de Web Audio. Debe llamarse dentro del gesto del usuario
-  // que desbloquea el audio (pointerdown), si no iOS ignora el resume().
+  // que desbloquea el audio, si no iOS ignora el resume(). Si el grafo ya
+  // existe pero el contexto no está 'running' (p. ej. 'interrupted' tras
+  // una llamada o el switch de silencio), reintenta el resume en este
+  // mismo gesto en lugar de asumir que ya quedó desbloqueado.
   function ensureWebAudio() {
-    if (gainNode) return true
+    if (gainNode) {
+      if (audioCtx && audioCtx.state !== 'running') audioCtx.resume().catch(() => {})
+      return true
+    }
     try {
       const Ctx = window.AudioContext || window.webkitAudioContext
       if (!Ctx) return false
@@ -127,16 +133,40 @@ export function initAudio({ uiRoot }) {
   btn.classList.toggle('is-muted', muted)
   uiRoot.appendChild(btn)
 
+  // Eventos que WebKit de iOS reconoce como activación del usuario para
+  // permitir audio. `touchstart`/`pointerdown` NO cuentan ahí: si el
+  // desbloqueo corriera en esos, resume()/play() quedan silenciosamente
+  // ignorados. Tampoco se puede asumir que el primer toque sea un tap: si
+  // el usuario entra deslizando (scroll-start.js), ese gesto también
+  // dispara estos eventos pero puede no bastar para desbloquear Web Audio
+  // (el contexto puede no quedar 'running' todavía), así que no se usa
+  // `once` y se reintenta en cada gesto válido hasta confirmar que el
+  // contexto está 'running' y la canción realmente está sonando.
+  const UNLOCK_EVENTS = ['touchend', 'pointerup', 'click', 'keydown']
+
   function unlock() {
     if (unlocked) return
-    unlocked = true
     ensureWebAudio()
     applyVolume(UNLOCK_DURATION)
-    audio.play().catch(() => {})
+    audio
+      .play()
+      .then(() => {
+        // Confirma el desbloqueo real antes de dejar de escuchar: un
+        // `play()` resuelto con el contexto todavía 'suspended' (o
+        // 'interrupted') no es un desbloqueo válido en iOS.
+        if (!audioCtx || audioCtx.state === 'running') {
+          unlocked = true
+          removeUnlockListeners()
+        }
+      })
+      .catch(() => {})
   }
   // En captura: así un stopPropagation local (lector de la 7, chiste de la
-  // 5) no impide que el primer toque desbloquee el audio.
-  window.addEventListener('pointerdown', unlock, { once: true, capture: true })
+  // 5) no impide que el gesto desbloquee el audio.
+  function removeUnlockListeners() {
+    UNLOCK_EVENTS.forEach((type) => window.removeEventListener(type, unlock, { capture: true }))
+  }
+  UNLOCK_EVENTS.forEach((type) => window.addEventListener(type, unlock, { capture: true }))
 
   function onError() {
     btn.style.display = 'none'
@@ -274,7 +304,7 @@ export function initAudio({ uiRoot }) {
   return {
     api,
     destroy() {
-      window.removeEventListener('pointerdown', unlock, { capture: true })
+      removeUnlockListeners()
       audio.removeEventListener('error', onError)
       audio.removeEventListener('ended', onEnded)
       btn.removeEventListener('click', onClick)
