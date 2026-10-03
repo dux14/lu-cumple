@@ -665,3 +665,138 @@
     transform: none;
   }
 }
+
+/* ---------- 19 · ventanilla al destino (impresa en el tiquete) ----------
+   Hueco a la derecha de «MAD». Medidas del mockup a 852×393 (tiquete de
+   767 px): el slot arranca en el 52,8 % del ancho. Solo transform/opacity. */
+.holo-slot {
+  position: absolute;
+  z-index: 6;
+  left: 52.8%;
+  top: 18px;
+  width: 200px;
+  height: 170px;
+  pointer-events: none;
+}
+
+.port {
+  position: absolute;
+  left: 18px;
+  top: 4px;
+  width: 150px;
+  height: 160px;
+  border-radius: 46% / 40%;
+  overflow: hidden;
+  box-shadow: 0 0 0 5px #2b1a3a, 0 0 0 6px rgba(255, 255, 255, 0.18), inset 0 0 18px rgba(0, 0, 0, 0.67);
+}
+
+.port-view,
+.port-view svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.port-shade {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background: linear-gradient(#2b1a3a, #20142c);
+}
+
+.port-shade::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 6px;
+  width: 26px;
+  height: 4px;
+  margin-left: -13px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.port-glass {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  background: linear-gradient(130deg, rgba(255, 255, 255, 0.13) 0%, transparent 35%, transparent 70%, rgba(255, 255, 255, 0.06) 100%);
+}
+
+.port-cap {
+  position: absolute;
+  left: 0;
+  top: 170px;
+  width: 186px;
+  margin: 0;
+  text-align: center;
+  font-family: var(--f-hand);
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--lilac);
+}
+
+.port-win {
+  animation: port-tw 2.4s infinite steps(2);
+}
+
+.port-win:nth-child(3n) {
+  animation-delay: 0.7s;
+}
+
+.port-win:nth-child(4n) {
+  animation-delay: 1.3s;
+}
+
+@keyframes port-tw {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.port-plane {
+  animation: port-cross 7s linear infinite;
+}
+
+@keyframes port-cross {
+  from {
+    transform: translate(-30px, 0);
+  }
+  to {
+    transform: translate(190px, -18px);
+  }
+}
+
+.port-cloud {
+  animation: port-drift 14s linear infinite;
+}
+
+@keyframes port-drift {
+  from {
+    transform: translateX(-20px);
+  }
+  to {
+    transform: translateX(30px);
+  }
+}
+
+/* Barra de Safari visible (852×320): el hueco se reduce, así que la
+   ventanilla se omite igual que la nota del asiento. */
+@media (max-height: 340px) {
+  .holo-slot {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .port-win,
+  .port-plane,
+  .port-cloud {
+    animation: none;
+  }
+}

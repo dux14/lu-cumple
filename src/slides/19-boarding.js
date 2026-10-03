@@ -16,6 +16,7 @@ import { outbound, inbound, passenger } from '../data/trip.js'
 import { countdownText, countdownDays } from '../core/countdown.js'
 import { createSplitFlap } from '../ui/split-flap.js'
 import { getMadridVideo } from '../core/madrid-bg.js'
+import { renderTicketPort } from '../ui/ticket-port.js'
 
 const MONTH_NAMES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
 const WEEKDAYS = ['L', 'M', 'X', 'J', 'V', 'S', 'D']
@@ -39,7 +40,7 @@ function field(eyebrow, value) {
 // Tiquete holográfico: mismo diseño completo para ida y regreso (talón
 // perforado, foil, glare). Las notas a mano y el tilt se agregan aparte,
 // solo para el de ida.
-function renderHolo(trip) {
+function renderHolo(trip, portScene) {
   const card = document.createElement('div')
   card.className = 'holo'
 
@@ -84,7 +85,38 @@ function renderHolo(trip) {
   glare.className = 'holo-glare'
   card.append(grain, foil, glare)
 
-  return { card, main }
+  // Ventanilla al destino, impresa en el hueco a la derecha de los códigos.
+  const portParts = renderTicketPort(portScene)
+  card.appendChild(portParts.wrap)
+
+  return { card, main, portParts }
+}
+
+// Entrada de la ventanilla (tiempos del mockup, relativos a la entrada del
+// tiquete en `at`): el marco aparece a +0.9s, la cortina sube desde +1.5s y
+// la nota a mano llega a +3s.
+function portReset({ port, shade, cap }) {
+  gsap.set(port, { opacity: 0, scale: 0.85 })
+  gsap.set(shade, { yPercent: 0 })
+  gsap.set(cap, { opacity: 0 })
+}
+
+function portFinal({ port, shade, cap }) {
+  gsap.set(port, { opacity: 1, scale: 1 })
+  gsap.set(shade, { yPercent: -92 })
+  gsap.set(cap, { opacity: 1 })
+}
+
+function portIntro(tl, parts, at) {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    portFinal(parts)
+    return
+  }
+  // `at`: segundos absolutos o una etiqueta de la timeline.
+  const pos = (d) => (typeof at === 'number' ? at + d : `${at}+=${d}`)
+  tl.fromTo(parts.port, { opacity: 0, scale: 0.85 }, { opacity: 1, scale: 1, duration: 0.9, ease: 'expo.out' }, pos(0.9))
+  tl.fromTo(parts.shade, { yPercent: 0 }, { yPercent: -92, duration: 1.4, ease: 'power3.inOut' }, pos(1.5))
+  tl.fromTo(parts.cap, { opacity: 0 }, { opacity: 1, duration: 0.5 }, pos(3))
 }
 
 function renderAnnotation(text, extra) {
@@ -390,7 +422,7 @@ export const slide19 = {
     const scene0 = document.createElement('div')
     scene0.className = 'step-scene scene-outbound'
     scene0.dataset.scene = '0'
-    const { card: outCard } = renderHolo(outbound)
+    const { card: outCard, portParts: outPort } = renderHolo(outbound, 'madrid-noche')
     // Las notas van directo sobre la tarjeta (no dentro de `.holo-main`): así
     // quedan por encima del foil/glare sin importar dónde esté el brillo.
     const arrivalNote = renderAnnotation('te recojo a las 23:25 🌙')
@@ -411,7 +443,7 @@ export const slide19 = {
     const recap = document.createElement('div')
     recap.className = 'holo-recap'
     recap.innerHTML = `<span class="holo-recap-code">${outbound.from.code}</span><span class="holo-recap-arrow">✈</span><span class="holo-recap-code">${outbound.to.code}</span><span class="holo-recap-label">ida · ${outbound.date}</span>`
-    const { card: inCard } = renderHolo(inbound)
+    const { card: inCard, portParts: inPort } = renderHolo(inbound, 'bogota-dia')
     scene1.append(recap, inCard)
 
     // Escena 2: calendario doble, banda continua + Halloween.
@@ -459,6 +491,8 @@ export const slide19 = {
       scenes: [scene0, scene1, scene2, scene3],
       outCard,
       inCard,
+      outPort,
+      inPort,
       arrivalNote,
       seatNote,
       tiltHint,
@@ -471,7 +505,7 @@ export const slide19 = {
     return el
   },
   prepareEnter(el) {
-    const { scenes, outCard, inCard, arrivalNote, seatNote, tiltHint, bgMadrid, madridShade } = el._boarding
+    const { scenes, outCard, inCard, outPort, inPort, arrivalNote, seatNote, tiltHint, bgMadrid, madridShade } = el._boarding
     el._boarding.step = 0
     el._boarding.tiltCard = outCard
     gsap.set(scenes, { opacity: 0 })
@@ -479,11 +513,13 @@ export const slide19 = {
     gsap.set(outCard, { opacity: 0, rotationY: -110, rotationX: 18, scale: 0.6 })
     gsap.set(inCard, { opacity: 0, rotationY: -110, rotationX: 18, scale: 0.6 })
     gsap.set([arrivalNote, seatNote], { opacity: 0, y: 8 })
+    portReset(outPort)
+    portReset(inPort)
     gsap.set(tiltHint, { opacity: 0 })
     gsap.set([bgMadrid, madridShade], { opacity: 0, scale: 1.12 })
   },
   enter(el, ctx) {
-    const { bgFlight, scenes, outCard, arrivalNote, seatNote, tiltHint } = el._boarding
+    const { bgFlight, scenes, outCard, outPort, arrivalNote, seatNote, tiltHint } = el._boarding
     const scene0 = scenes[0]
     gsap.set(scene0, { display: 'flex' })
     bgFlight.play().catch(() => {})
@@ -495,6 +531,7 @@ export const slide19 = {
     tl.to(outCard, { opacity: 1, rotationY: 0, rotationX: 0, scale: 1, duration: 1.4, ease: 'expo.out' }, 0.1)
     // Barrido de brillo sobre el foil, ya con el tiquete de frente.
     tl.fromTo(outCard, { '--gx': '0%' }, { '--gx': '100%', duration: 1.2, ease: 'sine.inOut' }, 1.3)
+    portIntro(tl, outPort, 0.1)
     // Las notas aparecen recién cuando el tiquete terminó de entrar (1.5s).
     tl.to([arrivalNote, seatNote], { opacity: 1, y: 0, duration: 0.4, stagger: 0.15, ease: 'power2.out' }, 1.6)
     tl.to(tiltHint, { opacity: 0.8, duration: 0.4 }, 2.0)
@@ -503,7 +540,7 @@ export const slide19 = {
   // paso: hay que encolar con posiciones relativas ('<', '+=', sin números
   // absolutos) porque el playhead ya avanzó de largo.
   showStep(el, i, ctx) {
-    const { bgFlight, bgMadrid, madridShade, scenes, outCard, inCard } = el._boarding
+    const { bgFlight, bgMadrid, madridShade, scenes, outCard, inCard, inPort } = el._boarding
     const target = scenes[i]
     const others = scenes.filter((s) => s !== target)
     // Paso vigente: si ella avanza rápido, las llamadas encoladas por pasos
@@ -559,8 +596,11 @@ export const slide19 = {
           '<',
         )
         ctx.tl.fromTo(inCard, { '--gx': '0%' }, { '--gx': '100%', duration: 1.2, ease: 'sine.inOut' }, '<+=0.2')
+        ctx.tl.addLabel('inEnter', '<-=0.2')
+        portIntro(ctx.tl, inPort, 'inEnter')
       } else {
         gsap.set(inCard, { opacity: 1, rotationY: 0, rotationX: 0, scale: 1 })
+        portFinal(inPort)
       }
     }
 
@@ -569,7 +609,9 @@ export const slide19 = {
   // Retroceso desde la slide 20: muestra directo la escena del paso sin
   // recorrer las anteriores ni repetir entradas/confeti.
   enterAtStep(el, step, ctx) {
-    const { bgFlight, bgMadrid, madridShade, scenes, outCard, inCard, arrivalNote, seatNote, tiltHint } = el._boarding
+    const { bgFlight, bgMadrid, madridShade, scenes, outCard, inCard, outPort, inPort, arrivalNote, seatNote, tiltHint } = el._boarding
+    portFinal(outPort)
+    portFinal(inPort)
     gsap.set(outCard, { opacity: 1, rotationY: 0, rotationX: 0, scale: 1 })
     gsap.set(inCard, { opacity: 1, rotationY: 0, rotationX: 0, scale: 1 })
     el._boarding.inCardEntered = true
