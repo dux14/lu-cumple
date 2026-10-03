@@ -788,8 +788,12 @@
 /* Barra de Safari visible (852×320): el hueco se reduce, así que la
    ventanilla se omite igual que la nota del asiento. */
 @media (max-height: 340px) {
+  /* Con la barra de Safari visible (el caso normal en iPhone) la ventanilla
+     se reduce en vez de ocultarse. */
   .holo-slot {
-    display: none;
+    top: 10px;
+    transform: scale(0.82);
+    transform-origin: top left;
   }
 }
 

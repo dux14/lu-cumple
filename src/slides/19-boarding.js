@@ -53,7 +53,7 @@ function renderHolo(trip, portScene) {
   route.className = 'holo-route'
   const iata = document.createElement('div')
   iata.className = 'holo-row holo-iata'
-  iata.innerHTML = `<span>${trip.from.code}</span><span class="holo-iata-arrow">✈</span><span>${trip.to.code}</span>`
+  iata.innerHTML = `<span>${trip.from.code}</span><span class="holo-iata-arrow">✈︎</span><span>${trip.to.code}</span>`
   const cities = document.createElement('div')
   cities.className = 'holo-row holo-cities'
   cities.innerHTML = `<span>${trip.from.city} · ${trip.from.airport}</span><span></span><span>${trip.to.city} · ${trip.to.airport}</span>`
@@ -205,7 +205,7 @@ function renderCalendar(year, monthIndex) {
         }
         if (isEdge(year, monthIndex, day)) {
           cell.classList.add('cal-day-edge')
-          cell.textContent = '✈'
+          cell.textContent = '✈︎'
         }
       }
       grid.appendChild(cell)
@@ -442,7 +442,7 @@ export const slide19 = {
     scene1.dataset.scene = '1'
     const recap = document.createElement('div')
     recap.className = 'holo-recap'
-    recap.innerHTML = `<span class="holo-recap-code">${outbound.from.code}</span><span class="holo-recap-arrow">✈</span><span class="holo-recap-code">${outbound.to.code}</span><span class="holo-recap-label">ida · ${outbound.date}</span>`
+    recap.innerHTML = `<span class="holo-recap-code">${outbound.from.code}</span><span class="holo-recap-arrow">✈︎</span><span class="holo-recap-code">${outbound.to.code}</span><span class="holo-recap-label">ida · ${outbound.date}</span>`
     const { card: inCard, portParts: inPort } = renderHolo(inbound, 'bogota-dia')
     scene1.append(recap, inCard)
 
