@@ -25,5 +25,3 @@ export const inbound = {
   duration: '10 h 20 min',
   seat: '14D',
 }
-
-export const airline = 'Avianca'
