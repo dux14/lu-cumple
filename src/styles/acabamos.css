@@ -8,6 +8,17 @@
   transform-origin: 50% 50%;
 }
 
+/* Capas promovidas de antemano: el texto, la línea, el punto y la estrella
+   solo animan transform/opacity, así que el compositor las escala sin
+   repintar (el resplandor es un box-shadow que se rasteriza una vez). */
+.acabamos-title,
+.acabamos-tv,
+.acabamos-tvdot,
+.acabamos-star {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+
 /* Línea horizontal en la que colapsa el texto, como una TV vieja al
    apagarse (mismos valores que el mockup aprobado, en unidades relativas). */
 .acabamos-tv {

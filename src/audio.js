@@ -10,6 +10,7 @@
 // inofensivo).
 import { gsap } from 'gsap'
 import { mixVolume } from './core/audio-mix.js'
+import { buildPlan, tapeStopPlan, valueAt, MIN_RAMP_SECONDS } from './core/audio-ramp.js'
 import { songCues, shouldJump, VERSE_2_START } from './data/song-cues.js'
 
 const NOTE_ICON =
@@ -22,6 +23,8 @@ const DUCK_DEFAULT_SECONDS = 0.4
 const TAPE_STOP_DEFAULT_SECONDS = 1.2
 const RESUME_DEFAULT_SECONDS = 0.6
 const JUMP_CROSSFADE_HALF_SECONDS = 0.6 // fade-out + fade-in ≈ 1,2 s de crossfade
+const SEEK_TIMEOUT_MS = 700 // tope de espera al evento 'seeked' (iOS puede tardar)
+const QUICK_FADE_SECONDS = 0.15
 const LOOP_RESTART_FADE_SECONDS = 2
 
 function readStoredMuted() {
@@ -49,6 +52,12 @@ export function initAudio({ uiRoot }) {
   audio.preload = 'auto'
   audio.src = `${import.meta.env.BASE_URL}audio/song.m4a`
   audio.volume = 0
+  // Tono variable al cambiar la velocidad: con la corrección de tono activa
+  // (el valor por defecto) WebKit silencia el audio por debajo de ~0,5x, y el
+  // tape stop se oía como un corte en vez de frenar. Sin corrección baja el
+  // tono como una cinta real y no se silencia.
+  audio.preservesPitch = false
+  audio.webkitPreservesPitch = false
   document.body.appendChild(audio)
 
   let muted = readStoredMuted()
@@ -62,7 +71,13 @@ export function initAudio({ uiRoot }) {
   let held = false
   let holdTimer = null
   let currentSlideId = null
-  let crossfadeTimer = null
+  // Generación de la última transición (salto, tape stop, resume): toda
+  // continuación asíncrona (timers, 'seeked') compara contra ella y se
+  // descarta si otra transición la pisó (navegación rápida).
+  let gen = 0
+  let timers = []
+  let pendingAt = null // destino de un salto en curso (null si no hay)
+  let gainPlan = null // modelo JS de la rampa vigente (ver core/audio-ramp.js)
 
   // Estado de Web Audio: si `gainNode` queda en null (no soportado o falla
   // la creación), todo cae al fallback de `audio.volume` con GSAP.
@@ -112,17 +127,40 @@ export function initAudio({ uiRoot }) {
     }
   }
 
-  // Rampa el volumen a `value` en `seconds`. Usa el GainNode si está listo;
-  // si no, cae al tween de `audio.volume` (comportamiento anterior).
-  function setGain(value, seconds) {
+  // Volumen actual estimado. `AudioParam.value` no es fiable durante una
+  // automatización en iOS, así que se usa el modelo propio de la rampa.
+  function currentGain() {
+    if (gainNode) {
+      return gainPlan ? valueAt(gainPlan, audioCtx.currentTime) : gainNode.gain.value
+    }
+    return audio.volume
+  }
+
+  // Encadena rampas lineales [{ to, seconds }] desde el valor ACTUAL (sin
+  // saltos). Se lee el valor antes de cancelar lo programado y se ancla con
+  // setValueAtTime; así una rampa que pisa a otra continúa desde donde iba.
+  // Con GainNode usa su automatización; si no, cae al tween de
+  // `audio.volume` (comportamiento anterior).
+  function rampGain(segments) {
     if (gainNode) {
       const now = audioCtx.currentTime
-      gainNode.gain.cancelScheduledValues(now)
-      gainNode.gain.setValueAtTime(gainNode.gain.value, now)
-      gainNode.gain.linearRampToValueAtTime(value, Math.max(now, now + seconds))
+      const cur = currentGain()
+      const param = gainNode.gain
+      param.cancelScheduledValues(now)
+      param.setValueAtTime(cur, now)
+      gainPlan = buildPlan(cur, now, segments)
+      for (const { t, v } of gainPlan.points.slice(1)) param.linearRampToValueAtTime(v, t)
       return
     }
-    gsap.to(audio, { volume: value, duration: seconds, overwrite: true })
+    gsap.killTweensOf(audio, 'volume')
+    const tl = gsap.timeline()
+    for (const { to, seconds } of segments) {
+      tl.to(audio, { volume: to, duration: Math.max(MIN_RAMP_SECONDS, seconds), ease: 'none' })
+    }
+  }
+
+  function setGain(value, seconds) {
+    rampGain([{ to: value, seconds }])
   }
 
   function applyVolume(seconds) {
@@ -194,31 +232,92 @@ export function initAudio({ uiRoot }) {
   // final suave que ya trae el archivo exportado (sin volver a arrancar).
   function onEnded() {
     if (currentSlideId === '22-cierre' || held) return
-    audio.currentTime = VERSE_2_START
-    setGain(0, 0)
-    audio.play().catch(() => {})
-    applyVolume(LOOP_RESTART_FADE_SECONDS)
+    // Ya terminó: está en silencio, no hay nada que fundir hacia afuera.
+    transitionTo({ at: VERSE_2_START, outSeconds: 0, inSeconds: LOOP_RESTART_FADE_SECONDS })
   }
   audio.addEventListener('ended', onEnded)
 
-  // Salto con crossfade: baja el volumen, mueve `currentTime` y vuelve a
-  // subir el volumen ya en la nueva posición. Cancela un crossfade anterior
-  // si todavía estaba en curso (navegación rápida entre slides).
+  function clearTimers() {
+    timers.forEach((t) => clearTimeout(t))
+    timers = []
+  }
+
+  // Mueve `currentTime` y avisa cuando el navegador terminó de buscar. Subir
+  // el volumen antes de 'seeked' dejaría oír el buffer viejo o un hueco.
+  function seekTo(at, done) {
+    let finished = false
+    let timer = null
+    const end = () => {
+      if (finished) return
+      finished = true
+      clearTimeout(timer)
+      audio.removeEventListener('seeked', end)
+      done()
+    }
+    audio.addEventListener('seeked', end)
+    timer = window.setTimeout(end, SEEK_TIMEOUT_MS)
+    audio.currentTime = at
+  }
+
+  // Transición limpia: fade-out → (seek) → fade-in. Una segunda transición
+  // pisa a la primera (`gen`): cancela sus timers y continúa el fade desde el
+  // volumen en curso, sin saltos. Con una sola fuente de audio no hay
+  // crossfade simultáneo posible; el fade-out/in corto es el equivalente.
+  function transitionTo({ at, outSeconds, inSeconds }) {
+    const myGen = ++gen
+    clearTimers()
+    cancelTape()
+    if (typeof at === 'number') pendingAt = at
+
+    const finish = () => {
+      if (myGen !== gen) return
+      const land = () => {
+        if (myGen !== gen) return
+        pendingAt = null
+        audio.playbackRate = 1
+        if (!unlocked || held || tapeStopped) return
+        if (audio.paused) audio.play().catch(() => {})
+        applyVolume(inSeconds)
+      }
+      if (typeof at === 'number') seekTo(at, land)
+      else land()
+    }
+
+    const sounding = !audio.paused && currentGain() > 0.01
+    if (sounding && outSeconds > 0) {
+      setGain(0, outSeconds)
+      timers.push(window.setTimeout(finish, outSeconds * 1000 + 20))
+    } else {
+      setGain(0, 0)
+      finish()
+    }
+  }
+
+  // Salto con crossfade (cues 'jump').
   function crossfadeToPosition(at) {
-    if (crossfadeTimer) clearTimeout(crossfadeTimer)
-    setGain(0, JUMP_CROSSFADE_HALF_SECONDS)
-    crossfadeTimer = window.setTimeout(() => {
-      crossfadeTimer = null
-      audio.currentTime = at
-      applyVolume(JUMP_CROSSFADE_HALF_SECONDS)
-    }, JUMP_CROSSFADE_HALF_SECONDS * 1000)
+    transitionTo({
+      at,
+      outSeconds: JUMP_CROSSFADE_HALF_SECONDS,
+      inSeconds: JUMP_CROSSFADE_HALF_SECONDS,
+    })
+  }
+
+  // Cancela un tape stop en curso (pasos de velocidad pendientes).
+  let tapeTimers = []
+  function cancelTape() {
+    tapeTimers.forEach((t) => clearTimeout(t))
+    tapeTimers = []
   }
 
   function onVisibility() {
     if (document.hidden) {
       audio.pause()
     } else if (unlocked && !muted && !held && !tapeStopped) {
+      // Vuelve con fundido: el pause() del ocultado dejó la ganancia donde
+      // estaba y reanudar de golpe da un chasquido.
+      setGain(0, 0)
       audio.play().catch(() => {})
+      applyVolume(QUICK_FADE_SECONDS * 3)
     }
   }
   document.addEventListener('visibilitychange', onVisibility)
@@ -234,29 +333,39 @@ export function initAudio({ uiRoot }) {
       duckLevel = 1
       applyVolume(seconds)
     },
-    // Baja el playbackRate y el volumen hasta pausar, efecto "cinta que se
-    // detiene". playbackRate sí es escribible en iOS (a diferencia de
-    // volume), así que funciona incluso en el fallback sin Web Audio.
+    // Efecto "cinta que se detiene": baja el tono (playbackRate sin
+    // corrección de tono) mientras el volumen se mantiene y solo se apaga al
+    // final, y pausa. La velocidad se asigna en pasos de ~70 ms (no por
+    // frame) para no reconfigurar el pipeline de medios en cada tick del
+    // hilo principal. playbackRate sí es escribible en iOS (a diferencia de
+    // volume).
     tapeStop(seconds = TAPE_STOP_DEFAULT_SECONDS) {
+      gen++
+      clearTimers()
+      cancelTape()
+      pendingAt = null
       tapeStopped = true
-      gsap.to(audio, {
-        // 0.0625 es el mínimo que acepta Chromium; más bajo lanza error.
-        playbackRate: 0.07,
-        duration: seconds,
-        ease: 'power2.in',
-        overwrite: true,
-        onComplete: () => audio.pause(),
-      })
-      setGain(0, seconds)
+      const plan = tapeStopPlan({ seconds, startGain: currentVolume() })
+      rampGain(plan.gain)
+      for (const { t, rate } of plan.steps) {
+        // 0.08 queda por encima del mínimo que acepta Chromium (0.0625).
+        tapeTimers.push(
+          window.setTimeout(() => {
+            audio.playbackRate = rate
+          }, t * 1000),
+        )
+      }
+      tapeTimers.push(
+        window.setTimeout(() => {
+          tapeTimers = []
+          audio.pause()
+        }, seconds * 1000 + 30),
+      )
     },
     resume(seconds = RESUME_DEFAULT_SECONDS, atSeconds) {
-      // Mata un tapeStop en curso: si no, su onComplete pausa de nuevo.
-      gsap.killTweensOf(audio, 'playbackRate')
+      // Mata un tapeStop en curso: si no, su pausa final corta lo que arranca.
       tapeStopped = false
-      if (typeof atSeconds === 'number') audio.currentTime = atSeconds
-      audio.playbackRate = 1
-      if (!held) audio.play().catch(() => {})
-      applyVolume(seconds)
+      transitionTo({ at: atSeconds, outSeconds: QUICK_FADE_SECONDS, inSeconds: seconds })
     },
     // Aplica el cue musical del slide `slideId` (ver src/data/song-cues.js).
     // Enganche desde deck.js: `audio.onSlide(newState.id, dir)` en
@@ -283,8 +392,12 @@ export function initAudio({ uiRoot }) {
       if (holdTimer) clearTimeout(holdTimer)
       holdTimer = null
       if (!unlocked || tapeStopped) return
-      setGain(0, 0)
-      audio.play().catch(() => {})
+      // Solo se fuerza silencio si realmente había pausa: si aún sonaba
+      // (hold/release rápidos), el fade-in continúa desde el volumen actual.
+      if (audio.paused) {
+        setGain(0, 0)
+        audio.play().catch(() => {})
+      }
       applyVolume(seconds)
     },
     isMuted() {
@@ -306,7 +419,7 @@ export function initAudio({ uiRoot }) {
       if (!cue) return
       switch (cue.action) {
         case 'jump':
-          if (shouldJump({ position: audio.currentTime, window: cue.window, direction })) {
+          if (shouldJump({ position: pendingAt ?? audio.currentTime, window: cue.window, direction })) {
             crossfadeToPosition(cue.at)
           }
           break
@@ -340,7 +453,9 @@ export function initAudio({ uiRoot }) {
       audio.removeEventListener('ended', onEnded)
       btn.removeEventListener('click', onClick)
       document.removeEventListener('visibilitychange', onVisibility)
-      if (crossfadeTimer) clearTimeout(crossfadeTimer)
+      clearTimers()
+      cancelTape()
+      if (holdTimer) clearTimeout(holdTimer)
       btn.remove()
       audio.remove()
       audioCtx?.close().catch(() => {})

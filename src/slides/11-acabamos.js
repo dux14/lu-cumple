@@ -91,7 +91,9 @@ function playApagon(el, ctx) {
     tl.to(title, { opacity: 0, duration: 0.4 })
     tl.to({}, { duration: BLACKOUT })
   } else {
-    tl.to(title, { scaleY: 0.02, filter: 'brightness(3)', duration: LINE_COLLAPSE, ease: 'power3.in' })
+    // Solo transform/opacity: animar `filter` obliga a repintar el texto en
+    // cada frame y en iOS coincidía con el tape stop (ver acabamos.css).
+    tl.to(title, { scaleY: 0.02, duration: LINE_COLLAPSE, ease: 'power3.in' })
     tl.set(title, { opacity: 0 })
     tl.set(tv, { opacity: 1, scaleX: 1 })
     tl.to(tv, { scaleX: 0.011, duration: POINT_COLLAPSE, ease: 'power3.in' })
@@ -143,9 +145,12 @@ export const slide11 = {
   prepareEnter(el) {
     const { title, tv, dot, star, dots } = el._acabamos
     gsap.set(el, { opacity: 0 })
-    gsap.set(title, { opacity: 0, y: 10, filter: 'brightness(1)', scaleY: 1 })
-    gsap.set([tv, dot], { opacity: 0, scaleX: 1, scale: 1 })
-    gsap.set(star, { opacity: 0 })
+    gsap.set(title, { opacity: 0, y: 10, scaleY: 1 })
+    // 0.01 y no 0: iOS no pinta (ni rasteriza) una capa con opacity 0, y el
+    // primer pintado de los resplandores caía justo en el apagón. Con 0.01
+    // la capa queda rasterizada de antemano y sigue siendo invisible.
+    gsap.set([tv, dot], { opacity: 0.01, scaleX: 1, scale: 1 })
+    gsap.set(star, { opacity: 0.01 })
     gsap.set(dots, { opacity: 0 })
     dots.textContent = ''
   },

@@ -38,8 +38,9 @@ export function createDeck({ root, uiRoot, slides, sky, audio, nebula }) {
     onPrev: () => retreat(),
   })
 
-  function ctxFor(index, tl) {
+  function ctxFor(index, tl, extra) {
     return {
+      ...extra,
       tl,
       lockNav: (value) => {
         locked = value
@@ -125,6 +126,9 @@ export function createDeck({ root, uiRoot, slides, sky, audio, nebula }) {
     // está en opacity:0 (fromTo de abajo): así no hay flash de texto visible
     // antes de que la animación de enter() lo revele.
     slides[newState.index].prepareEnter?.(inEl)
+    // `warp`: la slide entra justo después del warp 17→18 y puede esperar al
+    // destello (ver 18-flight.js) en vez de pisarlo.
+    const warp = isWarpTransition({ fromAct: acts[state.index], toAct: acts[newState.index], direction })
     applyScene(newState, direction)
     audio.onSlide?.(slides[newState.index].id, direction === 'forward' ? 'next' : 'prev')
 
@@ -141,7 +145,7 @@ export function createDeck({ root, uiRoot, slides, sky, audio, nebula }) {
           // Slides por escenas: saltan directo al paso sin repetir los anteriores.
           slide.enterAtStep(inEl, state.step, ctxFor(state.index, currentTl))
         } else {
-          slide.enter(inEl, ctxFor(state.index, currentTl))
+          slide.enter(inEl, ctxFor(state.index, currentTl, { warp }))
           // Si se entra directo en un paso > 0 (retroceso entre slides con
           // steps), revela los pasos previos sin esperar más navegación.
           for (let i = 1; i <= state.step; i++) {

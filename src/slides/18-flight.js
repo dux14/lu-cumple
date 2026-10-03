@@ -10,6 +10,11 @@ import { createSplitFlap } from '../ui/split-flap.js'
 import { outbound } from '../data/trip.js'
 
 const FLAG_COLORS = ['#FCD116', '#003893', '#CE1126', '#AA151B', '#F1BF00', '#ffffff']
+// El warp 17→18 corre desde el inicio de la transición (0,6 s antes de que
+// enter() arranque): su destello blanco llega al máximo ~0,5 s después de
+// enter() y se disipa hacia los 0,95 s. La ventanilla entra bajo el destello,
+// cuando ya se apagó el túnel de estrellas, no antes ni encima.
+const WARP_DELAY = 0.55
 const DESTINO_ROW = 1 // índice en ROWS: dispara el confeti cuando termina de formar MADRID
 
 // Los flaps solo tienen letras/números/espacio: sin tildes.
@@ -93,6 +98,9 @@ export const slide18 = {
     const { video, caption, board, rows, teaser } = el._flight
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const nextBtn = document.querySelector('.nav-next')
+    // Solo se espera al destello si de verdad hubo warp (no con ?s=18 ni
+    // retrocediendo desde la 19) y con movimiento permitido.
+    const d = ctx.warp && !reduced ? WARP_DELAY : 0
 
     ctx.lockNav(true)
     if (nextBtn) gsap.set(nextBtn, { opacity: 0 })
@@ -132,8 +140,8 @@ export const slide18 = {
     // secuencia sigue igual, solo sin movimiento en el fondo.
     video.play().catch(() => {})
 
-    tl.to(video, { opacity: 1, duration: 1, ease: 'power2.out' }, 0)
-    tl.to(caption, { opacity: 1, duration: 0.4 }, 0.3)
+    tl.to(video, { opacity: 1, duration: d ? 0.6 : 1, ease: 'power2.out' }, d)
+    tl.to(caption, { opacity: 1, duration: 0.4 }, d + 0.3)
     // La cámara "entra": el video se acerca y se desenfoca. El hint se apaga
     // en el camino, antes de que aparezca el tablero.
     // Este blur sí se mantiene animado (a diferencia del resto de blurs de
@@ -143,14 +151,14 @@ export const slide18 = {
     // sin blur se ve un simple zoom seco). El costo real en iPhone de animar
     // un filter:blur() sobre un único <video> es bajo comparado con los
     // puntos 1 y 3 del encargo.
-    tl.to(video, { scale: 2.2, filter: 'blur(14px) brightness(.35)', duration: 1.3, ease: 'power3.in' }, 1.6)
-    tl.to(caption, { opacity: 0, duration: 0.4 }, 2.1)
-    tl.to(board, { opacity: 1, scale: 1, duration: 0.5, ease: 'power2.out' }, 2.9)
-    tl.call(resolveBoard, null, 2.9)
+    tl.to(video, { scale: 2.2, filter: 'blur(14px) brightness(.35)', duration: 1.3, ease: 'power3.in' }, 1.6 + d)
+    tl.to(caption, { opacity: 0, duration: 0.4 }, 2.1 + d)
+    tl.to(board, { opacity: 1, scale: 1, duration: 0.5, ease: 'power2.out' }, 2.9 + d)
+    tl.call(resolveBoard, null, 2.9 + d)
     // El tablero ya se resolvió: el video se relaja y aparece la frase.
-    tl.to(video, { scale: 1.08, filter: 'blur(7px) brightness(.5)', duration: 1.4, ease: 'power2.out' }, 5)
-    tl.to(teaser, { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out' }, 5.3)
-    tl.call(revealArrow, null, 6.4)
+    tl.to(video, { scale: 1.08, filter: 'blur(7px) brightness(.5)', duration: 1.4, ease: 'power2.out' }, 5 + d)
+    tl.to(teaser, { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out' }, 5.3 + d)
+    tl.call(revealArrow, null, 6.4 + d)
   },
   leave(el) {
     const { video } = el._flight
