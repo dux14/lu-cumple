@@ -161,7 +161,9 @@ function replay(el) {
   const o = el._cierre
   if (!o.built) return // ya está armando: no se pisa
   clearConstellation(el)
-  playConstellation(el)
+  // El muchacho vuelve a mirar de espaldas y saluda cuando termina de nuevo.
+  o.avatar?.trigger('replay')
+  playConstellation(el, { onDone: () => o.avatar?.trigger('done') })
 }
 
 export const slide22 = {
@@ -207,6 +209,7 @@ export const slide22 = {
   enter(el, ctx) {
     const title = el.querySelector('.cierre-title')
     const replayBtn = el.querySelector('.cierre-replay')
+    el._cierre.avatar = ctx.avatar
     ctx.tl.to(title, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' })
     ctx.tl.call(() => {
       playConstellation(el, {
@@ -214,6 +217,7 @@ export const slide22 = {
           ctx.progress?.flashOut()
           gsap.to(replayBtn, { opacity: 0.3, duration: 0.4 })
           ctx.audio?.duck(0.5, 1.2)
+          ctx.avatar?.trigger('done')
         },
       })
     })

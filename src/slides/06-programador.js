@@ -4,6 +4,7 @@
 // Referencia visual: docs/superpowers/mockups/propuestas-fuertes.html
 // (sección "Terminal de la 5", función terminal()).
 import { gsap } from 'gsap'
+import { poseUrl } from '../data/avatar-cues.js'
 
 const TITLE_HTML = [
   'El programador <span class="accent alt">defectuoso</span>',
@@ -154,11 +155,16 @@ export const slide06 = {
       '<span class="term-dim">arreglando…</span><span class="term-bar"><b></b></span><span class="term-ok term-pct">0%</span> <span class="term-dim">· de a pasos</span>'
     body.appendChild(barRow)
 
-    // Hueco del sticker del muchacho: la clase queda lista, oculta hasta
-    // que llegue la imagen (ver comentario en term-sticker.css). Se activa
-    // agregando `.term-sticker--ready` y un <img> adentro.
+    // Muchacho obrero (3-obrero) parado sobre la esquina de la terminal: el
+    // hueco `.term-sticker` se activa con `--ready` (ver programador.css).
     const sticker = document.createElement('div')
-    sticker.className = 'term-sticker'
+    sticker.className = 'term-sticker term-sticker--ready'
+    sticker.setAttribute('aria-hidden', 'true')
+    const stickerImg = new Image()
+    stickerImg.alt = ''
+    stickerImg.className = 'sprite-pixel'
+    stickerImg.src = poseUrl('obrero')
+    sticker.appendChild(stickerImg)
     term.appendChild(sticker)
 
     el.appendChild(term)
@@ -168,6 +174,7 @@ export const slide06 = {
       barRow,
       bar: barRow.querySelector('.term-bar b'),
       pct: barRow.querySelector('.term-pct'),
+      sticker: stickerImg,
       tl: null,
     }
     return el
@@ -175,11 +182,16 @@ export const slide06 = {
   prepareEnter(el) {
     gsap.set(el, { opacity: 0 })
     gsap.set(el.querySelector('.term'), { opacity: 0, y: 14, scale: 0.97 })
+    gsap.set(el._term.sticker, { opacity: REDUCED ? 1 : 0, y: REDUCED ? 0 : 70 })
   },
   enter(el, ctx) {
     ctx.tl.to(el, { opacity: 1, duration: 0.4, ease: 'power2.out' })
     ctx.tl.to(el.querySelector('.term'), { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: 'power2.out' }, '-=0.15')
     ctx.tl.call(() => playTerminal(el))
+    // El obrero sube detrás de la terminal cuando ya empezó a arreglar.
+    if (!REDUCED) {
+      ctx.tl.to(el._term.sticker, { opacity: 1, y: 0, duration: 0.55, ease: 'back.out(1.5)' }, '+=1.2')
+    }
   },
   leave(el) {
     el._term.tl?.kill()

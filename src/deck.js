@@ -7,6 +7,7 @@ import { next as navNext, prev as navPrev } from './core/nav.js'
 import { progressModel } from './core/progress.js'
 import { createProgressBar } from './ui/progress-bar.js'
 import { createControls } from './ui/controls.js'
+import { createAvatar } from './ui/avatar.js'
 import { isWarpTransition, suspenseLevel } from './core/suspense.js'
 
 const OUT_DURATION = 0.3
@@ -38,6 +39,8 @@ export function createDeck({ root, uiRoot, slides, sky, audio, nebula }) {
     onPrev: () => retreat(),
   })
 
+  const avatar = createAvatar(uiRoot)
+
   function ctxFor(index, tl, extra) {
     return {
       ...extra,
@@ -49,6 +52,11 @@ export function createDeck({ root, uiRoot, slides, sky, audio, nebula }) {
       nebula,
       progress: progressBar,
       audio,
+      // Eventos del muchacho ligados a ESTA slide (se ignoran si ya cambió).
+      avatar: {
+        trigger: (event) => avatar.trigger(slides[index].id, event),
+        dismiss: () => avatar.dismiss(),
+      },
     }
   }
 
@@ -102,6 +110,7 @@ export function createDeck({ root, uiRoot, slides, sky, audio, nebula }) {
     // Sin dirección real (no es una navegación 'next'/'prev'): evita que un
     // cue de tipo 'jump' salte "raro" al entrar directo por `?s=N`.
     audio.onSlide?.(slides[state.index].id, null)
+    avatar.onSlide(slides[state.index].id)
     currentTl = gsap.timeline()
     slides[state.index].enter(currentEl, ctxFor(state.index, currentTl))
     updateUi()
@@ -131,6 +140,7 @@ export function createDeck({ root, uiRoot, slides, sky, audio, nebula }) {
     const warp = isWarpTransition({ fromAct: acts[state.index], toAct: acts[newState.index], direction })
     applyScene(newState, direction)
     audio.onSlide?.(slides[newState.index].id, direction === 'forward' ? 'next' : 'prev')
+    avatar.onSlide(slides[newState.index].id)
 
     const tl = gsap.timeline({
       onComplete() {

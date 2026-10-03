@@ -566,6 +566,7 @@ export const slide19 = {
         bgMadrid.currentTime = 0
         bgMadrid.play().catch(() => {})
         startCountdown(el, { animateFirst: true })
+        ctx.avatar?.trigger('madrid')
       })
       ctx.tl.fromTo(
         [bgMadrid, madridShade],
@@ -575,6 +576,7 @@ export const slide19 = {
       )
     } else {
       stopCountdown(el)
+      ctx.avatar?.dismiss()
       ctx.tl.to([bgMadrid, madridShade], { opacity: 0, duration: 0.4, ease: 'power2.in' }, '<')
       ctx.tl.call(() => {
         if (!isCurrent()) return
@@ -627,6 +629,7 @@ export const slide19 = {
       gsap.set([bgMadrid, madridShade], { opacity: 1, scale: 1 })
       bgMadrid.play().catch(() => {})
       startCountdown(el)
+      ctx.avatar?.trigger('madrid')
     } else {
       bgFlight.play().catch(() => {})
     }

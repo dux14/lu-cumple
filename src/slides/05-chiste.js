@@ -11,13 +11,14 @@ const JOKE_HTML = '[Chiste hot]'
 
 const VEIL_LABEL = 'contenido sensible 🙈 · mantén presionado'
 
-function bindHold(el) {
+function bindHold(el, ctx) {
   const o = el._chiste
   let held = false
 
   function reveal() {
     if (held) return
     held = true
+    ctx.avatar?.trigger('reveal')
     o.wrap.classList.add('is-held')
     gsap.to(o.joke, { opacity: 1, scale: 1, duration: 0.35, ease: 'power2.out' })
     gsap.to(o.veil, { opacity: 0, duration: 0.3, ease: 'power2.out' })
@@ -27,6 +28,7 @@ function bindHold(el) {
   function hide() {
     if (!held) return
     held = false
+    ctx.avatar?.dismiss()
     o.wrap.classList.remove('is-held')
     gsap.to(o.joke, { opacity: 0, scale: 0.96, duration: 0.3, ease: 'power2.in' })
     gsap.to(o.veil, { opacity: 1, duration: 0.3, ease: 'power2.in' })
@@ -93,7 +95,7 @@ export const slide05 = {
   },
   enter(el, ctx) {
     ctx.tl.to(el, { opacity: 1, duration: 0.4, ease: 'power2.out' })
-    bindHold(el)
+    bindHold(el, ctx)
   },
   leave(el) {
     el._chiste.unbind?.()

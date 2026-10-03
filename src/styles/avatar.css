@@ -1,0 +1,79 @@
+/* El muchacho (src/ui/avatar.js): esquina inferior izquierda, junto a la
+   flecha «anterior». Contenedor a todo el ancho que recorta por abajo (así
+   se «asoma» sobre el borde del viewport); solo se anima transform/opacity.
+   Sprites de pixel art: image-rendering pixelated a escala entera. */
+:root {
+  --avatar-pad: max(6px, env(safe-area-inset-bottom));
+  --avatar-left: calc(max(12px, env(safe-area-inset-left)) + 44px);
+}
+
+#ui > .avatar {
+  pointer-events: none;
+  position: fixed;
+  inset: auto 0 0 0;
+  height: calc(67px + var(--avatar-pad));
+  overflow: hidden;
+  z-index: 3;
+  visibility: hidden;
+}
+
+.avatar-rig {
+  position: absolute;
+  left: var(--avatar-left);
+  bottom: var(--avatar-pad);
+  width: 46px;
+  height: 67px;
+  transform-origin: 0 100%;
+  will-change: transform, opacity;
+}
+
+.avatar-bob {
+  position: absolute;
+  inset: 0;
+}
+
+.avatar-bob img,
+.sprite-pixel {
+  image-rendering: pixelated;
+  display: block;
+}
+
+.avatar-bob img {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 46px;
+  visibility: hidden;
+}
+
+.avatar-bob img.on {
+  visibility: visible;
+}
+
+.avatar-bob.bounce {
+  animation: avatar-hop 0.32s steps(2) infinite;
+}
+
+.avatar-bob.walk {
+  animation: avatar-hop 0.5s steps(2) infinite;
+}
+
+@keyframes avatar-hop {
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+/* Poco alto (barra de Safari visible): se reduce para no tapar contenido. */
+@media (max-height: 340px) {
+  .avatar-rig {
+    scale: 0.75;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .avatar-bob.bounce,
+  .avatar-bob.walk {
+    animation: none;
+  }
+}

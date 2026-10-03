@@ -102,19 +102,17 @@
   background: repeating-linear-gradient(90deg, var(--rose) 0 10px, var(--black) 10px 12px);
 }
 
-/* Hueco del sticker del muchacho: oculto hasta que llegue la imagen.
-   Al agregarla, sumar `.term-sticker--ready` (no antes: sin imagen no se
-   muestra ningún círculo punteado de relleno). */
+/* Hueco del muchacho obrero (3-obrero, pixel art): parado sobre la esquina
+   superior derecha de la terminal. Oculto hasta que se activa con
+   `.term-sticker--ready` (la slide lo sube con transform/opacity). */
 .term-sticker {
   display: none;
   position: absolute;
-  right: -18px;
-  top: -34px;
-  width: 68px;
-  height: 68px;
-  border-radius: 50%;
-  overflow: hidden;
-  transform: rotate(8deg);
+  right: 18px;
+  bottom: calc(100% - 3px);
+  width: 46px;
+  height: 67px;
+  pointer-events: none;
 }
 
 .term-sticker--ready {
@@ -124,7 +122,6 @@
 .term-sticker img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
 }
 
 /* La «o» final de «arreglando» (Caveat, rotada) sobresale de su caja y
