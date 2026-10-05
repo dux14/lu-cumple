@@ -1,16 +1,17 @@
 // Las 22 slides + slide 0. Simples se declaran como datos con `textSlide`;
-// especiales (0, 3, 5, 6, 7, 9, 10, 11, 12, 13, 18, 19, 20, 21, 22) viven en su propio
+// especiales (0, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 18, 19, 20, 21, 22) viven en su propio
 // archivo. Textos y actos según
 // docs/superpowers/specs/2026-09-27-lu-cumple-base-design.md — tabla
-// "Estructura". Placeholders entre corchetes: quedan para entregas
-// posteriores (carta, dedicatoria). El orden 5/6 se invirtió a propósito
+// "Estructura". El orden 5/6 se invirtió a propósito
 // (ver docs/plans/propuestas-por-slide.md, slide 6): el chiste hot pasa a
 // ser la 5 y el programador la 6, justo antes de la oración.
 import { slide00 } from './00-rotate.js'
 import { slide03 } from './03-collage.js'
+import { slide04 } from './04-carta.js'
 import { slide05 } from './05-chiste.js'
 import { slide06 } from './06-programador.js'
 import { slide07 } from './07-oracion.js'
+import { slide08 } from './08-dedicatoria.js'
 import { slide09 } from './09-creditos.js'
 import { slide10 } from './10-te-quiero.js'
 import { slide11 } from './11-acabamos.js'
@@ -43,11 +44,7 @@ export const slides = [
 
   // 3–4 · Nosotros
   slide03,
-  textSlide({
-    id: '04-carta',
-    act: 'nosotros',
-    paragraphs: ['[Carta — párrafo 1]', '[Carta — párrafo 2]', '[Carta — párrafo 3]'],
-  }),
+  slide04,
 
   // 5–6 · Risas (orden invertido: chiste hot → programador, para que el
   // programador quede justo antes de la oración; ver revisión de la 6)
@@ -56,11 +53,7 @@ export const slides = [
 
   // 7–8 · Fe
   slide07,
-  textSlide({
-    id: '08-dedicatoria',
-    act: 'fe',
-    paragraphs: ['[Dedicatoria — párrafo 1]', '[Dedicatoria — párrafo 2]', '[Dedicatoria — párrafo 3]'],
-  }),
+  slide08,
 
   // 9–10 · Falso final
   slide09,

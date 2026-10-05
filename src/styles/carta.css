@@ -1,0 +1,296 @@
+/* Slides 4 (carta) y 8 (dedicatoria): un párrafo por pantalla, revelado
+   palabra por palabra. Tamaños en clamp con vh, pensados para 852×393 y
+   852×320 (el iPhone real con la barra de Safari queda en ≤340 de alto). */
+
+.slide-carta .w,
+.slide-ded .w {
+  display: inline-block;
+  will-change: transform, opacity, filter;
+}
+
+/* La frase clave de cada párrafo se "enciende" cuando terminan de entrar
+   las palabras. */
+.slide-carta .accent,
+.slide-ded .accent {
+  transition: text-shadow 1.2s var(--ease-out);
+}
+
+.slide-carta .accent.is-lit,
+.slide-ded .accent.is-lit {
+  text-shadow: 0 0 18px rgba(255, 92, 122, 0.45);
+}
+
+.slide-ded .accent.alt.is-lit {
+  text-shadow: 0 0 18px rgba(201, 182, 255, 0.45);
+}
+
+/* ---------- Carta ---------- */
+
+.carta-seg {
+  position: relative;
+  max-width: 700px;
+  width: 100%;
+}
+
+.carta-salute {
+  font-family: var(--f-hand);
+  font-weight: 600;
+  font-size: clamp(22px, 8vh, 32px);
+  color: var(--lilac);
+  margin: 0 0 clamp(4px, 1.6vh, 10px);
+}
+
+.carta-p {
+  font-family: var(--f-text);
+  font-weight: 400;
+  font-size: clamp(15px, 5.4vh, 21px);
+  line-height: 1.5;
+  margin: 0;
+  text-wrap: pretty;
+}
+
+.carta-p .accent {
+  font-size: 1.5em;
+  line-height: 1;
+}
+
+.carta-big {
+  font-family: var(--f-display);
+  font-weight: 800;
+  font-size: clamp(28px, 12vh, 48px);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.carta-sign {
+  margin: clamp(2px, 1vh, 6px) 0 0;
+}
+
+.carta-sign .accent {
+  font-size: clamp(34px, 13vh, 54px);
+  line-height: 1.1;
+}
+
+.carta-heart {
+  display: block;
+  width: clamp(70px, 24vh, 96px);
+  margin: clamp(4px, 1.6vh, 10px) auto 0;
+  overflow: visible;
+}
+
+.carta-heart path {
+  fill: none;
+  stroke: var(--rose);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 6px rgba(255, 92, 122, 0.55));
+}
+
+/* Luz de lectura detrás del texto: respira muy lento. En el cierre se
+   calienta hacia el vino. */
+.carta-glow {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 150vh;
+  height: 90vh;
+  margin: -45vh 0 0 -75vh;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(58, 26, 79, 0.55), rgba(20, 11, 34, 0.25) 60%, transparent);
+  pointer-events: none;
+  animation: carta-breathe 7s ease-in-out infinite;
+  transition: background 1.5s;
+}
+
+.carta-glow.is-warm {
+  background: radial-gradient(closest-side, rgba(140, 29, 64, 0.4), rgba(58, 26, 79, 0.25) 60%, transparent);
+}
+
+@keyframes carta-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 1;
+  }
+}
+
+.carta-dots {
+  position: absolute;
+  bottom: max(12px, env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 4px;
+}
+
+.carta-dots i {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--white);
+  opacity: 0.2;
+  transition: all 0.3s;
+}
+
+.carta-dots i.is-on {
+  opacity: 0.9;
+  background: var(--rose);
+  width: 11px;
+  border-radius: 2px;
+}
+
+/* ---------- Dedicatoria ---------- */
+
+.ded-eyebrow {
+  position: absolute;
+  top: max(30px, 9vh);
+  left: 0;
+  right: 0;
+  margin: 0;
+  font-family: var(--f-text);
+  font-weight: 600;
+  font-size: clamp(10px, 2.8vh, 12px);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--lilac);
+  opacity: 0.6;
+}
+
+.ded-seg {
+  max-width: 640px;
+  width: 100%;
+}
+
+.ded-p {
+  font-family: var(--f-text);
+  font-weight: 500;
+  font-size: clamp(16px, 6vh, 23px);
+  line-height: 1.5;
+  margin: 0;
+  text-wrap: balance;
+}
+
+.ded-p .accent {
+  font-size: 1.45em;
+  line-height: 1;
+}
+
+/* "LUz": el LU en display con halo, la z escrita a mano. */
+.ded-luz {
+  position: relative;
+  margin: clamp(0px, 0.6vh, 4px) 0;
+  line-height: 1;
+}
+
+.ded-lu {
+  position: relative;
+  display: inline-block;
+  font-family: var(--f-display);
+  font-weight: 800;
+  font-size: clamp(40px, 17vh, 68px);
+  letter-spacing: 0.02em;
+  transition: text-shadow 1.4s var(--ease-out);
+}
+
+.ded-luz.is-lit .ded-lu {
+  text-shadow:
+    0 0 14px rgba(255, 255, 255, 0.7),
+    0 0 40px rgba(201, 182, 255, 0.55);
+}
+
+.ded-z {
+  position: relative;
+  display: inline-block;
+  font-family: var(--f-hand);
+  font-weight: 700;
+  font-size: clamp(72px, 28vh, 110px);
+  color: var(--rose);
+  margin-left: -0.04em;
+  line-height: 0.6;
+  text-shadow: 0 0 18px rgba(255, 92, 122, 0.5);
+  transform: rotate(-4deg);
+}
+
+.ded-halo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: clamp(140px, 46vh, 190px);
+  height: clamp(140px, 46vh, 190px);
+  margin: calc(clamp(140px, 46vh, 190px) / -2) 0 0 calc(clamp(140px, 46vh, 190px) / -2);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(201, 182, 255, 0.35), rgba(255, 92, 122, 0.12) 55%, transparent);
+  pointer-events: none;
+}
+
+.ded-final {
+  position: relative;
+}
+
+.ded-big {
+  font-family: var(--f-display);
+  font-weight: 800;
+  font-size: clamp(36px, 16vh, 64px);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.ded-sign .accent {
+  font-size: clamp(38px, 15vh, 60px);
+  line-height: 1.1;
+  margin: 0;
+}
+
+.ded-sign {
+  margin: 0;
+}
+
+/* Estrellas alrededor del cierre: aparecen una vez y después titilan lento,
+   como el resto del cielo (no es confeti). */
+.ded-spark {
+  position: absolute;
+  font-style: normal;
+  color: var(--lilac);
+  font-size: clamp(10px, 3.4vh, 14px);
+  pointer-events: none;
+}
+
+.ded-spark:nth-child(1) { left: -12%; top: 6%; }
+.ded-spark:nth-child(2) { left: 104%; top: 0%; color: var(--white); }
+.ded-spark:nth-child(3) { left: -4%; top: 78%; color: var(--rose); }
+.ded-spark:nth-child(4) { left: 110%; top: 62%; }
+.ded-spark:nth-child(5) { left: 30%; top: -18%; color: var(--white); font-size: clamp(8px, 2.4vh, 10px); }
+.ded-spark:nth-child(6) { left: 74%; top: 104%; color: var(--rose); font-size: clamp(8px, 2.4vh, 10px); }
+.ded-spark:nth-child(7) { left: 92%; top: -14%; font-size: clamp(8px, 2.4vh, 10px); }
+
+.ded-spark.is-twinkle {
+  animation: ded-twinkle 3.2s ease-in-out infinite;
+}
+
+.ded-spark:nth-child(even).is-twinkle {
+  animation-delay: -1.6s;
+}
+
+@keyframes ded-twinkle {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .carta-glow,
+  .ded-spark.is-twinkle {
+    animation: none;
+  }
+}
