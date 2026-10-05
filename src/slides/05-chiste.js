@@ -5,9 +5,9 @@
 // largo no dispare la navegación del deck (ver src/ui/controls.js).
 import { gsap } from 'gsap'
 
-// Placeholder: reemplaza por el chiste real. Puede llevar HTML simple
-// (<span class="accent">…</span>) igual que `lines` en textSlide.
-const JOKE_HTML = '[Chiste hot]'
+// Puede llevar HTML simple (<span class="accent">…</span>) igual que
+// `lines` en textSlide.
+const JOKE_HTML = 'Voy a buscar esa lencería blanca<br /><span class="accent">cueste lo que cueste</span>'
 
 const VEIL_LABEL = 'contenido sensible 🙈 · mantén presionado'
 
