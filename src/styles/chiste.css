@@ -56,3 +56,10 @@
 .chiste-wrap.is-held .chiste-veil-label {
   opacity: 0;
 }
+
+/* El remate va en rojo, no en el rosa de acento: es lo único rojo del
+   deck, a propósito, para que se sienta "hot". */
+.chiste-red {
+  color: #ff2b43;
+  text-shadow: 0 0 16px rgba(255, 43, 67, 0.45);
+}

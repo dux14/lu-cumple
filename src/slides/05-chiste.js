@@ -7,7 +7,7 @@ import { gsap } from 'gsap'
 
 // Puede llevar HTML simple (<span class="accent">…</span>) igual que
 // `lines` en textSlide.
-const JOKE_HTML = 'Voy a buscar esa lencería blanca<br /><span class="accent">cueste lo que cueste</span>'
+const JOKE_HTML = 'Voy a buscar esa lencería blanca<br /><span class="accent chiste-red">cueste lo que cueste</span>'
 
 const VEIL_LABEL = 'contenido sensible 🙈 · mantén presionado'
 
