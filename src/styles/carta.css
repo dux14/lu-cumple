@@ -5,7 +5,6 @@
 .slide-carta .w,
 .slide-ded .w {
   display: inline-block;
-  will-change: transform, opacity, filter;
 }
 
 /* La frase clave de cada párrafo se "enciende" cuando terminan de entrar

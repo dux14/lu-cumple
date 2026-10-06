@@ -54,6 +54,8 @@ function buildEnter(el, i, tl) {
     duration: 0.55,
     stagger: each,
     ease: 'power2.out',
+    // Sin esto cada palabra queda con su capa de filtro viva en iOS Safari.
+    clearProps: 'filter',
   })
   if (accents.length) {
     tl.call(() => accents.forEach((a) => a.classList.add('is-lit')), null, '-=0.15')
@@ -76,7 +78,7 @@ function showCarta(el, i, ctx) {
     const tl = gsap.timeline()
     o.tl = tl
     buildEnter(el, i, tl)
-    if (i === LAST) tl.call(() => ctx?.sky?.shootingStar?.(), null, '-=1.2')
+    if (i === LAST) tl.call(() => !o.left && ctx?.sky?.shootingStar?.(), null, '-=1.2')
   }
 
   if (o.seg.childElementCount && !REDUCED) {
@@ -112,7 +114,7 @@ export const slide04 = {
     STEPS.forEach(() => dots.appendChild(document.createElement('i')))
 
     el.append(glow, seg, dots)
-    el._carta = { glow, seg, dots, tl: null }
+    el._carta = { glow, seg, dots, tl: null, left: false }
     return el
   },
   prepareEnter(el) {
@@ -125,7 +127,14 @@ export const slide04 = {
   showStep(el, i, ctx) {
     showCarta(el, i, ctx)
   },
+  // Al retroceder desde la slide siguiente: entra directo al último paso
+  // visto, sin pasar por el párrafo 1.
+  enterAtStep(el, step, ctx) {
+    ctx.tl.to(el, { opacity: 1, duration: 0.4, ease: 'power2.out' })
+    showCarta(el, step, ctx)
+  },
   leave(el) {
+    el._carta.left = true
     el._carta.tl?.kill()
   },
 }

@@ -40,7 +40,7 @@ function buildEnter(el, i, tl, ctx) {
     gsap.set(words, { opacity: 0, y: 8, filter: 'blur(6px)' })
     tl.to(
       words,
-      { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.55, stagger: 0.05, ease: 'power2.out' },
+      { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.55, stagger: 0.05, ease: 'power2.out', clearProps: 'filter' },
       k === 0 ? 0 : '>-0.1',
     )
     // El bloque LUz va entre el primer y el segundo párrafo.
@@ -76,12 +76,12 @@ function addFinal(seg, tl, ctx) {
   gsap.set(big, { opacity: 0, y: 14, filter: 'blur(8px)' })
   gsap.set(sign, { opacity: 0, clipPath: 'inset(0 100% 0 0)' })
   gsap.set(sparks, { opacity: 0, scale: 0 })
-  tl.to(big, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.8, ease: 'power3.out' }, 0.1)
+  tl.to(big, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.8, ease: 'power3.out', clearProps: 'filter' }, 0.1)
   tl.to(sign, { opacity: 1, clipPath: 'inset(0 0% 0 0)', duration: 1, ease: 'power1.inOut' }, '>-0.1')
   tl.call(() => sign.classList.add('is-lit'))
   tl.to(sparks, { opacity: 1, scale: 1, duration: 0.5, stagger: 0.09, ease: 'back.out(3)' }, '<')
   tl.call(() => sparks.forEach((s) => s.classList.add('is-twinkle')))
-  tl.call(() => ctx?.sky?.shootingStar?.(), null, '<')
+  tl.call(() => !seg.closest('.slide')?._ded.left && ctx?.sky?.shootingStar?.(), null, '<')
 }
 
 function showDed(el, i, ctx) {
@@ -124,7 +124,7 @@ export const slide08 = {
     seg.className = 'ded-seg'
 
     el.append(eyebrow, seg)
-    el._ded = { eyebrow, seg, tl: null }
+    el._ded = { eyebrow, seg, tl: null, left: false }
     return el
   },
   prepareEnter(el) {
@@ -139,7 +139,14 @@ export const slide08 = {
   showStep(el, i, ctx) {
     showDed(el, i, ctx)
   },
+  // Al retroceder desde la slide siguiente: entra directo al último paso.
+  enterAtStep(el, step, ctx) {
+    ctx.tl.to(el, { opacity: 1, duration: 0.4, ease: 'power2.out' })
+    ctx.tl.to(el._ded.eyebrow, { opacity: 0.6, letterSpacing: '0.3em', duration: 1.2, ease: 'power2.out' }, 0)
+    showDed(el, step, ctx)
+  },
   leave(el) {
+    el._ded.left = true
     el._ded.tl?.kill()
   },
 }
